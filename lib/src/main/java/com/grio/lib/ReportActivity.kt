@@ -8,7 +8,6 @@ import kotlinx.android.synthetic.main.a_report.*
 
 class ReportActivity : AppCompatActivity() {
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_report)
@@ -18,10 +17,6 @@ class ReportActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val bitmap = DataHolder.data
         screeny.setImageBitmap(bitmap)
-
-
-
-
     }
 
 
