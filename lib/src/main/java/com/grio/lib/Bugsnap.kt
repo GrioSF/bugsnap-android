@@ -5,17 +5,13 @@ import android.app.Application
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE
 import android.content.Intent
-import androidx.core.content.ContextCompat.getSystemService
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
 
 
 class Bugsnap {
-
-
 
     companion object {
 
@@ -41,10 +37,10 @@ class Bugsnap {
                      sd = ShakeDetector(object : ShakeDetector.Listener {
                         override fun hearShake() {
                             Log.d(TAG, "shaking!")
-                            var rootView = activity?.window?.decorView as View
-                            var bitmap = Utils.takeScreenshot(rootView)
+                            val rootView = activity?.window?.decorView as View
+                            val bitmap = Utils.takeScreenshot(rootView)
 
-                            var intent = Intent(activity, ReportActivity::class.java)
+                            val intent = Intent(activity, ReportActivity::class.java)
                             DataHolder.data = bitmap
                             activity.startActivity(intent)
 
@@ -64,8 +60,6 @@ class Bugsnap {
             })
 
         }
-
-
 
         private const val TAG = "Bugsnap"
     }
