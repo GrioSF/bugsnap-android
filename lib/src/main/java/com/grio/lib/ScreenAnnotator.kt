@@ -83,7 +83,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * User stopped touching screen. Stop recording.
      */
     private fun stopRecording() {
-        drawPath.quadTo(xCurrent, yCurrent, (x + xCurrent) / 2, (y + yCurrent) / 2)
+        drawPath.lineTo(xCurrent, yCurrent)
 
         // If user taps screen, create a dot
         if (xStart == xCurrent && yStart == yCurrent) {
