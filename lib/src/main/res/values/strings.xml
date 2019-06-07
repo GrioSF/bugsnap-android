@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">lib</string>
+    <string name="screenshot_of_bug">Screenshot of bug</string>
 </resources>

@@ -9,14 +9,25 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
     </androidx.appcompat.widget.Toolbar>
 
     <ImageView
             android:id="@+id/screeny"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="36dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/screenshot_of_bug"/>
+
+    <com.grio.lib.ScreenAnnotator
+            android:id="@+id/screenAnnotator"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="36dp"
