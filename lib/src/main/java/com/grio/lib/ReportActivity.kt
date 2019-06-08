@@ -3,8 +3,15 @@ package com.grio.lib
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.a_report.*
+import android.view.ViewGroup
+import android.util.DisplayMetrics
+
+
+
+
 
 class ReportActivity : AppCompatActivity() {
 
@@ -15,6 +22,18 @@ class ReportActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Report a bug"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+
+        val layoutParams = screeny.layoutParams
+        layoutParams.width = (width * 0.75).toInt()
+        layoutParams.height = (height * 0.75).toInt()
+        screeny.layoutParams = layoutParams
+        screenAnnotator.layoutParams = layoutParams
+
         val bitmap = DataHolder.data
         screeny.setImageBitmap(bitmap)
     }
