@@ -18,7 +18,7 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     // Graphics
     private var brush = Paint()
-    private var drawPath = Path()
+    private var drawnPaths = arrayListOf<Path>()
 
     // State
     private var xStart = 0f
@@ -53,6 +53,25 @@ class ScreenAnnotator @JvmOverloads constructor(
         return true
     }
 
+    // Draw onto screen
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+
+        for (path in drawnPaths) {
+            canvas?.drawPath(path, brush)
+        }
+    }
+
+    /**
+     * Removes the last line drawn
+     */
+    fun undo() {
+        if (drawnPaths.isNotEmpty()) {
+            drawnPaths.remove(drawnPaths.last())
+            invalidate()
+        }
+    }
+
     /**
      * Record when user touches the screen
      *
@@ -60,7 +79,8 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun startDrawing(x: Float, y: Float) {
-        drawPath.moveTo(x, y)
+        drawnPaths.add(Path())
+        drawnPaths.last().moveTo(x, y)
         xStart = x
         yStart = y
         xCurrent = x
@@ -74,7 +94,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun recordMovement(x: Float, y: Float) {
-        drawPath.quadTo(xCurrent, yCurrent, (x + xCurrent) / 2, (y + yCurrent) / 2)
+        drawnPaths.last().quadTo(xCurrent, yCurrent, (x + xCurrent) / 2, (y + yCurrent) / 2)
         xCurrent = x
         yCurrent = y
     }
@@ -83,19 +103,13 @@ class ScreenAnnotator @JvmOverloads constructor(
      * User stopped touching screen. Stop recording.
      */
     private fun stopRecording() {
-        drawPath.lineTo(xCurrent, yCurrent)
+        drawnPaths.last().lineTo(xCurrent, yCurrent)
 
         // If user taps screen, create a dot
         if (xStart == xCurrent && yStart == yCurrent) {
             brush.style = Paint.Style.FILL
-            drawPath.addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
+            drawnPaths.last().addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
             brush.style = Paint.Style.STROKE
         }
-    }
-
-    // Draw onto screen
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        canvas?.drawPath(drawPath, brush)
     }
 }

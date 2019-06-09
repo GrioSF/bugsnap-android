@@ -3,14 +3,9 @@ package com.grio.lib
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.MenuItem
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.a_report.*
-import android.view.ViewGroup
 import android.util.DisplayMetrics
-
-
-
 
 
 class ReportActivity : AppCompatActivity() {
@@ -19,23 +14,41 @@ class ReportActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_report)
 
+        setupToolbar()
+        attachAnnotatorToScreenshotHolder()
+        setScreenshotToHolder()
+
+        finishEditing.setOnClickListener {
+            // do something on finish editing
+        }
+
+        undo.setOnClickListener {
+            screenAnnotator.undo()
+        }
+    }
+
+    private fun setupToolbar() {
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Report a bug"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
 
+    private fun attachAnnotatorToScreenshotHolder() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val height = displayMetrics.heightPixels
         val width = displayMetrics.widthPixels
 
-        val layoutParams = screeny.layoutParams
+        val layoutParams = screenshotHolder.layoutParams
         layoutParams.width = (width * 0.75).toInt()
         layoutParams.height = (height * 0.75).toInt()
-        screeny.layoutParams = layoutParams
+        screenshotHolder.layoutParams = layoutParams
         screenAnnotator.layoutParams = layoutParams
+    }
 
+    private fun setScreenshotToHolder() {
         val bitmap = DataHolder.data
-        screeny.setImageBitmap(bitmap)
+        screenshotHolder.setImageBitmap(bitmap)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

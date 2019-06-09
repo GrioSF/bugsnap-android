@@ -14,7 +14,7 @@
             app:layout_constraintEnd_toEndOf="parent"/>
 
     <ImageView
-            android:id="@+id/screeny"
+            android:id="@+id/screenshotHolder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -22,14 +22,14 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:background="@android:color/white"
-            android:elevation="6dp"
+            android:elevation="5dp"
             android:contentDescription="@string/screenshot_of_bug"/>
 
     <com.grio.lib.ScreenAnnotator
             android:id="@+id/screenAnnotator"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="6dp"
+            android:elevation="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -41,10 +41,22 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/screenAnnotator"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:elevation="6dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:elevation="5dp"
             android:background="@drawable/circular_confirmation_background"
             android:contentDescription="@string/share_edited_screenshot"/>
+
+    <ImageButton
+            android:id="@+id/undo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/screenAnnotator"
+            android:layout_marginEnd="20dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:elevation="5dp"
+            android:background="@drawable/circular_undo_background"
+            android:contentDescription="@string/undo_last_drawing"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
