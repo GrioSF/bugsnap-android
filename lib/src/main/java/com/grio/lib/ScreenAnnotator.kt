@@ -26,6 +26,8 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var xCurrent = 0f
     private var yCurrent = 0f
 
+    lateinit var listener: Listener
+
     init {
         brush.apply {
             style = Paint.Style.STROKE
@@ -35,6 +37,15 @@ class ScreenAnnotator @JvmOverloads constructor(
             strokeCap = Paint.Cap.ROUND
             strokeWidth = 8f
         }
+    }
+
+    fun setEventListener(listener: Listener) {
+        this.listener = listener
+    }
+
+    interface Listener {
+        fun lineDrawn()
+        fun canvasIsBlank()
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -68,6 +79,8 @@ class ScreenAnnotator @JvmOverloads constructor(
     fun undo() {
         if (drawnPaths.isNotEmpty()) {
             drawnPaths.remove(drawnPaths.last())
+            if (drawnPaths.isEmpty())
+                listener.canvasIsBlank()
             invalidate()
         }
     }
@@ -111,5 +124,7 @@ class ScreenAnnotator @JvmOverloads constructor(
             drawnPaths.last().addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
             brush.style = Paint.Style.STROKE
         }
+
+        listener.lineDrawn()
     }
 }
