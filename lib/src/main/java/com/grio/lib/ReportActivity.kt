@@ -43,22 +43,9 @@ class ReportActivity : AppCompatActivity() {
     }
 
     /**
-     * Attaches Annotator to Screenshot by setting them both to
-     * be 75% of the screen size. Both views are centered on screen in XML.
      * Attaches Annotation Listener to show and hide undo button.
      */
     private fun setupScreenAnnotator() {
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val height = displayMetrics.heightPixels
-        val width = displayMetrics.widthPixels
-
-        val layoutParams = screenshotHolder.layoutParams
-        layoutParams.width = (width * 0.75).toInt()
-        layoutParams.height = (height * 0.75).toInt()
-        screenshotHolder.layoutParams = layoutParams
-        screenAnnotator.layoutParams = layoutParams
-
         screenAnnotator.setEventListener(object : ScreenAnnotator.Listener {
             override fun lineDrawn() {
                 toggleUndoButton(true)
