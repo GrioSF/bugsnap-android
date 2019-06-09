@@ -33,6 +33,10 @@ class ReportActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    /**
+     * Attaches Annotator to Screenshot by setting them both to
+     * be 75% of the screen size. Both views are centered on screen in XML
+     */
     private fun attachAnnotatorToScreenshotHolder() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
