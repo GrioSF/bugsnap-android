@@ -39,15 +39,6 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
     }
 
-    fun setEventListener(listener: Listener) {
-        this.listener = listener
-    }
-
-    interface Listener {
-        fun lineDrawn()
-        fun canvasIsBlank()
-    }
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> startDrawing(event.x, event.y)
@@ -64,13 +55,28 @@ class ScreenAnnotator @JvmOverloads constructor(
         return true
     }
 
-    // Draw onto screen
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         for (path in drawnPaths) {
             canvas?.drawPath(path, brush)
         }
+    }
+
+    /**
+     * Listens for Annotation Events
+     */
+    interface Listener {
+        // Fired when a line is drawn to the screen
+        fun lineDrawn()
+        // Fired when all lines drawn to screen have been removed
+        fun canvasIsBlank()
+    }
+
+    /**
+     * Sets listener for ScreenAnnotator
+     */
+    fun setEventListener(listener: Listener) {
+        this.listener = listener
     }
 
     /**
@@ -124,7 +130,6 @@ class ScreenAnnotator @JvmOverloads constructor(
             drawnPaths.last().addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
             brush.style = Paint.Style.STROKE
         }
-
         listener.lineDrawn()
     }
 }

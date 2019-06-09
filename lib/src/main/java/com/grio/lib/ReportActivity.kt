@@ -33,6 +33,9 @@ class ReportActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sets up toolbar
+     */
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Report a bug"
@@ -67,6 +70,11 @@ class ReportActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Toggles undo button on and off of the screen
+     *
+     * @param shouldShowUndo whether or not undo button should be shown
+     */
     private fun toggleUndoButton(shouldShowUndo: Boolean) {
         // Calculate pixels for end margin of undo button
         val pixelsForDp = TypedValue.applyDimension(
@@ -98,6 +106,9 @@ class ReportActivity : AppCompatActivity() {
         layout.applyTo(reportActivityConstrainLayout)
     }
 
+    /**
+     * Attaches saved screenshot to ImageView
+     */
     private fun setScreenshotToHolder() {
         val bitmap = DataHolder.data
         screenshotHolder.setImageBitmap(bitmap)
