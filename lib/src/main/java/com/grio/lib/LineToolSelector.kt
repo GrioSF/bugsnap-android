@@ -66,11 +66,9 @@ class LineToolSelector @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         canvas?.let {
             pencilIcon.draw(it)
         }
-
         if (showColors) palette.forEach { swatch ->
             swatchPaint.color = Color.parseColor(swatch.color)
             canvas?.drawCircle(width.toFloat() / 2, swatch.position, swatch.radius, swatchPaint)
@@ -109,11 +107,11 @@ class LineToolSelector @JvmOverloads constructor(
     }
 
     /**
-     * onMeasure used for tracking initial height of view and calculating radius
+     * onLayout used for tracking initial height of view and calculating radius
      * for turning card view into circle
      */
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
         if (originalHeight == 0f) {
             originalHeight = height.toFloat()
             radius = width.toFloat() / 2
