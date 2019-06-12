@@ -1,0 +1,44 @@
+# Android CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-android/ for more details
+#
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    # CircleCI Android Containers: https://hub.docker.com/r/circleci/android/tags
+    docker:
+      - image: circleci/android:api-28
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "lib/build.gradle" }}
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "lib/build.gradle" }}
+      - run:
+          name: Run Lib Lint Tests
+          command: ./gradlew lib:lint lib:test
+      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+          path: lib/build/reports
+      # - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+      #     path: lib/build/test-results
+      - run:
+          name: Run App Lint Tests
+          command: ./gradlew app:lint app:test
+      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+          path: app/build/reports
+      # - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+      #     path: app/build/test-results
+      # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
+      # - run:
+      #     name: Build Library Artifact
+      #     command: |
+      #       ./gradlew lib:assembleRelease
+      #       ./gradlew app:assembleRelease
