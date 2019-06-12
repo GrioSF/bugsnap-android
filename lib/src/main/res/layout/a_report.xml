@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reportActivityConstrainLayout"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/reportActivityConstrainLayout"
-        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="#FFFFFF">
 
     <androidx.appcompat.widget.Toolbar
@@ -19,13 +20,13 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scaleType="fitXY"
+            android:background="@android:color/white"
+            android:elevation="5dp"
+            android:contentDescription="@string/screenshot_of_bug"
             app:layout_constraintBottom_toBottomOf="@id/guidelineBottom"
             app:layout_constraintStart_toStartOf="@id/guidelineStart"
             app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
-            app:layout_constraintTop_toTopOf="@id/guidelineTop"
-            android:background="@android:color/white"
-            android:elevation="5dp"
-            android:contentDescription="@string/screenshot_of_bug"/>
+            app:layout_constraintTop_toTopOf="@id/guidelineTop"/>
 
     <com.grio.lib.ScreenAnnotator
             android:id="@+id/screenAnnotator"
@@ -37,55 +38,66 @@
             app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
             app:layout_constraintTop_toTopOf="@id/guidelineTop"/>
 
-    <ImageButton
+    <Button
             android:id="@+id/finishEditing"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
-            app:layout_constraintTop_toBottomOf="@id/guidelineBottom"
-            android:layout_width="50dp"
+            android:layout_width="0dp"
             android:layout_height="50dp"
+            android:layout_margin="10dp"
             android:elevation="5dp"
-            android:background="@drawable/circular_confirmation_background"
-            android:contentDescription="@string/share_edited_screenshot"/>
+            android:background="#009688"
+            android:textColor="#FFF"
+            android:text="@string/confirm"
+            android:contentDescription="@string/share_edited_screenshot"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     <ImageButton
             android:id="@+id/undo"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guidelineBottom"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:elevation="5dp"
             android:background="@drawable/circular_undo_background"
-            android:contentDescription="@string/undo_last_drawing"/>
+            android:contentDescription="@string/undo_last_drawing"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guidelineTop"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    <com.grio.lib.LineToolSelector
+            android:id="@+id/lineSelector"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintStart_toEndOf="@id/guidelineEnd"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guidelineTop"/>
 
     <androidx.constraintlayout.widget.Guideline
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/guidelineTop"
-            app:layout_constraintGuide_percent=".125"
-            android:orientation="horizontal"/>
-
-    <androidx.constraintlayout.widget.Guideline
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".1"/>
+
+    <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guidelineBottom"
-            app:layout_constraintGuide_percent=".875"
-            android:orientation="horizontal"/>
-
-    <androidx.constraintlayout.widget.Guideline
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".9"/>
+
+    <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guidelineStart"
-            app:layout_constraintGuide_percent=".125"
-            android:orientation="vertical"/>
-
-    <androidx.constraintlayout.widget.Guideline
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".05"/>
+
+    <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guidelineEnd"
-            app:layout_constraintGuide_percent=".875"
-            android:orientation="vertical"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".85"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
