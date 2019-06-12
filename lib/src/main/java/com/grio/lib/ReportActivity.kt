@@ -7,7 +7,6 @@ import android.transition.TransitionManager
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.a_report.*
-import android.util.DisplayMetrics
 import androidx.constraintlayout.widget.ConstraintSet
 import android.util.TypedValue
 import android.view.animation.OvershootInterpolator
@@ -23,6 +22,7 @@ class ReportActivity : AppCompatActivity() {
         setupToolbar()
         setupScreenAnnotator()
         setScreenshotToHolder()
+        setupLineSelector()
 
         finishEditing.setOnClickListener {
             // do something on finish editing
@@ -46,6 +46,7 @@ class ReportActivity : AppCompatActivity() {
      * Attaches Annotation Listener to show and hide undo button.
      */
     private fun setupScreenAnnotator() {
+        screenAnnotator.setPaintColor(lineSelector.getPaintColor())
         screenAnnotator.setEventListener(object : ScreenAnnotator.Listener {
             override fun lineDrawn() {
                 toggleUndoButton(true)
@@ -53,6 +54,17 @@ class ReportActivity : AppCompatActivity() {
 
             override fun canvasIsBlank() {
                 toggleUndoButton(false)
+            }
+        })
+    }
+
+    /**
+     * Attaches Color Listener to select line colors
+     */
+    private fun setupLineSelector() {
+        lineSelector.setColorListener(object : LineToolSelector.Listener {
+            override fun colorSelected(color: String) {
+                screenAnnotator.setPaintColor(color)
             }
         })
     }

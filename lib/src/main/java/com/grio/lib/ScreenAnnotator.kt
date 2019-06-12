@@ -18,9 +18,10 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     // Graphics
     private var brush = Paint()
-    private var drawnPaths = arrayListOf<Path>()
+    private var annotations = arrayListOf<Annotation>()
 
     // State
+    private var paintColor = "#000000"
     private var xStart = 0f
     private var yStart = 0f
     private var xCurrent = 0f
@@ -57,8 +58,9 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        for (path in drawnPaths) {
-            canvas?.drawPath(path, brush)
+        for (annotation in annotations) {
+            brush.color = Color.parseColor(annotation.color)
+            canvas?.drawPath(annotation.drawnPath, brush)
         }
     }
 
@@ -83,12 +85,16 @@ class ScreenAnnotator @JvmOverloads constructor(
      * Removes the last line drawn
      */
     fun undo() {
-        if (drawnPaths.isNotEmpty()) {
-            drawnPaths.remove(drawnPaths.last())
-            if (drawnPaths.isEmpty())
+        if (annotations.isNotEmpty()) {
+            annotations.remove(annotations.last())
+            if (annotations.isEmpty())
                 listener.canvasIsBlank()
             invalidate()
         }
+    }
+
+    fun setPaintColor(color: String) {
+        paintColor = color
     }
 
     /**
@@ -98,8 +104,8 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun startDrawing(x: Float, y: Float) {
-        drawnPaths.add(Path())
-        drawnPaths.last().moveTo(x, y)
+        annotations.add(Annotation(paintColor, Path()))
+        annotations.last().drawnPath.moveTo(x, y)
         xStart = x
         yStart = y
         xCurrent = x
@@ -113,7 +119,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun recordMovement(x: Float, y: Float) {
-        drawnPaths.last().quadTo(xCurrent, yCurrent, (x + xCurrent) / 2, (y + yCurrent) / 2)
+        annotations.last().drawnPath.quadTo(xCurrent, yCurrent, (x + xCurrent) / 2, (y + yCurrent) / 2)
         xCurrent = x
         yCurrent = y
     }
@@ -122,14 +128,19 @@ class ScreenAnnotator @JvmOverloads constructor(
      * User stopped touching screen. Stop recording.
      */
     private fun stopRecording() {
-        drawnPaths.last().lineTo(xCurrent, yCurrent)
+        annotations.last().drawnPath.lineTo(xCurrent, yCurrent)
 
         // If user taps screen, create a dot
         if (xStart == xCurrent && yStart == yCurrent) {
             brush.style = Paint.Style.FILL
-            drawnPaths.last().addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
+            annotations.last().drawnPath.addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
             brush.style = Paint.Style.STROKE
         }
         listener.lineDrawn()
     }
 }
+
+data class Annotation(
+    val color: String,
+    val drawnPath: Path
+)
