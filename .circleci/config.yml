@@ -95,18 +95,24 @@ jobs:
 
 workflows:
   version: 2
-  workflow:
+  test-build-deploy:
     jobs:
-      - test_project
+      - test_project:
+          filters:
+            tags:
+              only: /^v.*/
       - build_project:
           requires:
             - test_project
+          filters:
+            tags:
+              only: /^v.*/
       - publish_tag_to_github:
           requires:
             - test_project
             - build_project
           filters:
+            tags:
+              only: /^v.*/
             branches:
               ignore: /.*/
-            tags:
-              only: /.*/
