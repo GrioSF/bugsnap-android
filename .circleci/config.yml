@@ -3,42 +3,110 @@
 # Check https://circleci.com/docs/2.0/language-android/ for more details
 #
 version: 2
-jobs:
-  build:
-    working_directory: ~/code
-    # CircleCI Android Containers: https://hub.docker.com/r/circleci/android/tags
+references:
+  ## Workspaces
+  workspace: &workspace
+    ~/code
+
+  ## Docker Image Configurations
+  android_config: &android_config
+    working_directory: *workspace
     docker:
       - image: circleci/android:api-28
     environment:
-      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+      _JAVA_OPTIONS: "-Xmx3G"
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2G"'
+
+  ## Cache Helpers
+  gradle_key: &gradle_key
+    jars-{{ checksum "build.gradle" }}-{{ checksum  "lib/build.gradle" }}-{{ checksum  "app/build.gradle" }}
+  restore_gradle_cache: &restore_gradle_cache
+    restore_cache:
+      key: *gradle_key
+  save_gradle_cache: &save_gradle_cache
+    save_cache:
+      key: *gradle_key
+      paths:
+        - ~/.gradle
+
+  ## Dependencies
+  android_dependencies: &android_dependencies
+    run:
+      name: Download Android Dependencies
+      command: ./gradlew androidDependencies
+
+jobs:
+  # Run Tests
+  test_project:
+    <<: *android_config
     steps:
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "lib/build.gradle" }}
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "lib/build.gradle" }}
+      - *restore_gradle_cache
+      - *android_dependencies
+      - *save_gradle_cache
       - run:
           name: Run Lib Lint Tests
           command: ./gradlew lib:lint lib:test
-      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
           path: lib/build/reports
-      # - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
-      #     path: lib/build/test-results
+      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+          path: lib/build/test-results
       - run:
           name: Run App Lint Tests
           command: ./gradlew app:lint app:test
-      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
           path: app/build/reports
-      # - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
-      #     path: app/build/test-results
-      # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
-      # - run:
-      #     name: Build Library Artifact
-      #     command: |
-      #       ./gradlew lib:assembleRelease
-      #       ./gradlew app:assembleRelease
+      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+          path: app/build/test-results
+
+  build_project:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - *android_dependencies
+      - *save_gradle_cache
+      - run:
+          name: Build Library
+          command: ./gradlew clean lib:assembleRelease --stacktrace
+      - store_artifacts:
+          path: lib/build/outputs/aar/
+          destination: ./artifacts
+      - run:
+          name: Build Application
+          command: ./gradlew clean app:assembleRelease --stacktrace
+      - store_artifacts:
+          path: app/build/outputs/apk/
+          destination: ./artifacts
+
+  # Publishing to Github
+  publish_tag_to_github:
+    docker:
+      - image: circleci/golang:1.8
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - test_project
+      - build_project:
+          requires:
+            - test_project
+      - publish_tag_to_github:
+          requires:
+            - test_project
+            - build_project
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
