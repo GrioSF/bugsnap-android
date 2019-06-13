@@ -70,7 +70,7 @@ jobs:
       - run:
           name: "Create Artifacts Directory"
           command: |
-            mkdir -p ~/artifacts/
+            mkdir -p ./artifacts/
       - run:
           name: Build Library
           command: ./gradlew clean lib:assembleRelease --stacktrace
@@ -80,7 +80,7 @@ jobs:
       - run:
           name: "Move Library Artifacts"
           command: |
-            find code/lib/build/outputs/ -iname '*.aar' -exec cp {} ~/artifacts/ \;
+            find lib/build/outputs/ -iname '*.aar' -exec cp {} ./artifacts/ \;
       - run:
           name: Build Application
           command: ./gradlew clean app:assembleRelease --stacktrace
@@ -90,7 +90,7 @@ jobs:
       - run:
           name: "Move Application Artifacts"
           command: |
-            find code/app/build/outputs/apk/ -iname '*.apk' -exec cp {} ~/artifacts/ \;
+            find app/build/outputs/apk/ -iname '*.apk' -exec cp {} ./artifacts/ \;
       - persist_to_workspace:
           root: *workspace
           paths:
