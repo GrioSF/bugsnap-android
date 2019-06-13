@@ -73,18 +73,19 @@ jobs:
       - run:
           name: "Move Library Artifacts"
           command: |
-            mkdir -p ./artifacts/lib/
-            cp -R lib/build/outputs/aar/ ./artifacts/lib/
+            mkdir -p ./artifacts/
+            cp -R lib/build/outputs/aar/* ./artifacts/
       - run:
           name: Build Application
           command: ./gradlew clean app:assembleRelease --stacktrace
       - run:
           name: "Move Application Artifacts"
           command: |
-            mkdir -p ./artifacts/app/
-            cp -R app/build/outputs/apk/release/ ./artifacts/app/
+            mkdir -p ./artifacts/
+            cp -R app/build/outputs/apk/release/* ./artifacts/
       - store_artifacts:
           path: ./artifacts/
+          destination: ./artifacts
       - persist_to_workspace:
           root: *workspace
           paths:
@@ -101,7 +102,7 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             go get github.com/tcnksm/ghr
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/artifacts
 
 workflows:
   version: 2
