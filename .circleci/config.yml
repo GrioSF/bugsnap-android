@@ -84,6 +84,7 @@ jobs:
   publish_tag_to_github:
     docker:
       - image: circleci/golang:1.8
+    working_directory: *workspace
     steps:
       - attach_workspace:
           at: ./artifacts
