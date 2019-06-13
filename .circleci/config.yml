@@ -72,18 +72,18 @@ jobs:
           command: ./gradlew clean lib:assembleRelease --stacktrace
       - store_artifacts:
           path: lib/build/outputs/aar/
-          destination: ./artifacts/aar/
+          destination: ./artifacts/lib/
       - run:
           name: Build Application
           command: ./gradlew clean app:assembleRelease --stacktrace
       - store_artifacts:
           path: app/build/outputs/apk/release/
-          destination: ./artifacts/apk/
+          destination: ./artifacts/app/
       - persist_to_workspace:
-          root: ./artifacts
+          root: *workspace
           paths:
-            - apk/*
-            - aar/*
+            - app/build/outputs/apk/release/*
+            - lib/build/outputs/aar/*
 
   # Publishing to Github
   publish_tag_to_github:
