@@ -82,8 +82,7 @@ jobs:
       - persist_to_workspace:
           root: artifacts
           paths:
-            - *.apk
-            - *.aar
+            - *
 
   # Publishing to Github
   publish_tag_to_github:
