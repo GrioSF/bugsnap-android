@@ -80,7 +80,7 @@ jobs:
           path: app/build/outputs/apk/release/
           destination: ./artifacts/apk/
       - persist_to_workspace:
-          root: artifacts
+          root: ./artifacts
           paths:
             - apk/*
             - aar/*
