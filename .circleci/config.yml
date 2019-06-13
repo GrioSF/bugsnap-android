@@ -68,22 +68,33 @@ jobs:
       - *android_dependencies
       - *save_gradle_cache
       - run:
+          name: "Create Artifacts Directory"
+          command: |
+            mkdir -p ~/artifacts/
+      - run:
           name: Build Library
           command: ./gradlew clean lib:assembleRelease --stacktrace
       - store_artifacts:
           path: lib/build/outputs/aar/
           destination: ./artifacts/lib/
       - run:
+          name: "Move Library Artifacts"
+          command: |
+            find code/lib/build/outputs/ -iname '*.aar' -exec cp {} ~/artifacts/ \;
+      - run:
           name: Build Application
           command: ./gradlew clean app:assembleRelease --stacktrace
       - store_artifacts:
           path: app/build/outputs/apk/release/
           destination: ./artifacts/app/
+      - run:
+          name: "Move Application Artifacts"
+          command: |
+            find code/app/build/outputs/apk/ -iname '*.apk' -exec cp {} ~/artifacts/ \;
       - persist_to_workspace:
           root: *workspace
           paths:
-            - app/build/outputs/apk/release/*
-            - lib/build/outputs/aar/*
+            - artifacts/*
 
   # Publishing to Github
   publish_tag_to_github:
