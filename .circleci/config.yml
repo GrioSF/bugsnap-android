@@ -123,7 +123,7 @@ workflows:
             - test_project
             - build_project
           filters:
-            tags:
-              only: /^v.*/
             branches:
               ignore: /.*/
+            tags:
+              only: /^v.*/
