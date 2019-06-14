@@ -17,10 +17,8 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        debug {
-            buildConfigField("String", "BUGSNAP_URL", getLocalProperty("bugsnap.url"))
-            buildConfigField("String", "BUGSNAP_PROJECT_NAME", getLocalProperty("bugsnap.projectName"))
-        }
+        buildConfigField("String", "BUGSNAP_URL", getLocalProperty("bugsnap.url"))
+        buildConfigField("String", "BUGSNAP_PROJECT_NAME", getLocalProperty("bugsnap.projectName"))
     }
 }
 

@@ -7,10 +7,10 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        BugSnap.init(this,
-            BuildConfig.BUGSNAP_URL,
-            BuildConfig.BUGSNAP_PROJECT_NAME)
-
-
+        if (BuildConfig.DEBUG) {
+            BugSnap.init(this,
+                BuildConfig.BUGSNAP_URL,
+                BuildConfig.BUGSNAP_PROJECT_NAME)
+        }
     }
 }
