@@ -31,7 +31,7 @@ def getLocalProperty(String propertyName) {
         props.load(new FileInputStream(propsFile))
         return props[propertyName]
     } else {
-        return ""
+        return "example"
     }
 }
 
