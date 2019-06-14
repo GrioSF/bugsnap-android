@@ -1,13 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.grio.lib">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application>
 
-        <activity android:name=".ReportActivity" android:label="Report a bug"
-        android:launchMode="singleInstance"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity android:name=".features.report.ReportActivity" android:label="Report a bug"
+                  android:launchMode="singleInstance"
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         </activity>
+
+        <activity android:name=".features.report.ReportSummaryActivity"
+                  android:label="Report Summary"/>
 
     </application>
 
