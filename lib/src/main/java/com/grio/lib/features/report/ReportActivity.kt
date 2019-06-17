@@ -1,23 +1,40 @@
-package com.grio.lib
+package com.grio.lib.features.report
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.transition.ChangeBounds
 import android.transition.TransitionManager
-import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.a_report.*
-import androidx.constraintlayout.widget.ConstraintSet
 import android.util.TypedValue
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.animation.OvershootInterpolator
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintSet
+import com.google.gson.Gson
+import com.grio.lib.core.di.DaggerInjector
+import com.grio.lib.features.editor.views.LineToolSelector
+import com.grio.lib.R
+import com.grio.lib.core.platform.BaseActivity
+import com.grio.lib.features.editor.views.ScreenAnnotator
+import kotlinx.android.synthetic.main.a_report.*
+import javax.inject.Inject
 
 const val UNDO_BUTTON_MARGIN_END = 20f
 
-class ReportActivity : AppCompatActivity() {
+
+class ReportActivity : BaseActivity() {
+
+    @Inject
+    lateinit var gson: Gson
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_report)
+        DaggerInjector.getComponent().inject(this)
+
+
 
         setupToolbar()
         setupScreenAnnotator()
@@ -25,7 +42,9 @@ class ReportActivity : AppCompatActivity() {
         setupLineSelector()
 
         finishEditing.setOnClickListener {
-            // do something on finish editing
+            // TODO: Update to transfer proper data to secondary Activity.
+            // Launches the summary Activity.
+            startActivity(Intent(this, ReportSummaryActivity::class.java))
         }
 
         undo.setOnClickListener {
@@ -111,6 +130,15 @@ class ReportActivity : AppCompatActivity() {
     private fun setScreenshotToHolder() {
         val bitmap = DataHolder.data
         screenshotHolder.setImageBitmap(bitmap)
+
+
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_main, menu)
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

@@ -1,4 +1,4 @@
-package com.grio.lib
+package com.grio.lib.features.editor.views
 
 import android.content.Context
 import android.graphics.Canvas

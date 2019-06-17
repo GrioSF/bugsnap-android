@@ -1,4 +1,4 @@
-package com.grio.lib
+package com.grio.lib.features.editor.views
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -17,6 +17,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import com.grio.lib.R
 
 const val EXPAND_COLLAPSE_DURATION = 200L
 const val SWATCH_POP_DURATION = 400L

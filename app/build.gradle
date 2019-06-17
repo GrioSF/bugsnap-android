@@ -1,7 +1,5 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
@@ -19,6 +17,22 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        all {
+            buildConfigField("String", "BUGSNAP_URL", getLocalProperty("bugsnap.url"))
+            buildConfigField("String", "BUGSNAP_PROJECT_NAME", getLocalProperty("bugsnap.projectName"))
+        }
+
+    }
+}
+
+def getLocalProperty(String propertyName) {
+    def propsFile = rootProject.file('local.properties')
+    if (propsFile.exists()) {
+        def props = new Properties()
+        props.load(new FileInputStream(propsFile))
+        return props[propertyName]
+    } else {
+        return "\"example\""
     }
 }
 
@@ -32,6 +46,6 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    // Local Bugsnap library.
+    // Local BugSnap library.
     implementation project(":lib")
 }

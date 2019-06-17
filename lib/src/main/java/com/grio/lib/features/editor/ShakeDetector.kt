@@ -1,4 +1,4 @@
-package com.grio.lib
+package com.grio.lib.features.editor
 
 
 import android.hardware.Sensor
@@ -22,13 +22,14 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
      * When the magnitude of total acceleration exceeds this
      * value, the phone is accelerating.
      */
-    private var accelerationThreshold = DEFAULT_ACCELERATION_THRESHOLD
+    private var accelerationThreshold =
+        DEFAULT_ACCELERATION_THRESHOLD
 
     private val queue = SampleQueue()
 
     private var sensorManager: SensorManager? = null
     private var accelerometer: Sensor? = null
-    var debounceMillis: Long? = null
+    private var debounceMillis: Long? = null
 
     /** Listens for shakes.  */
     interface Listener {
@@ -265,6 +266,7 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
         val SENSITIVITY_MEDIUM = 13
         val SENSITIVITY_HARD = 15
 
-        private val DEFAULT_ACCELERATION_THRESHOLD = SENSITIVITY_MEDIUM
+        private val DEFAULT_ACCELERATION_THRESHOLD =
+            SENSITIVITY_MEDIUM
     }
 }
