@@ -77,12 +77,12 @@ jobs:
             cp -R lib/build/outputs/aar/* ./artifacts/
       - run:
           name: Build Application
-          command: ./gradlew clean app:assembleRelease --stacktrace
+          command: ./gradlew clean app:assembleDebug --stacktrace
       - run:
           name: "Move Application Artifacts"
           command: |
             mkdir -p ./artifacts/
-            cp -R app/build/outputs/apk/release/* ./artifacts/
+            cp -R app/build/outputs/apk/debug/* ./artifacts/
       - store_artifacts:
           path: ./artifacts/
           destination: ./artifacts
