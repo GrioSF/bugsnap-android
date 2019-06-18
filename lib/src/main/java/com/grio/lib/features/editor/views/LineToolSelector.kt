@@ -1,4 +1,4 @@
-package com.grio.lib
+package com.grio.lib.features.editor.views
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -17,6 +17,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import com.grio.lib.R
 
 const val EXPAND_COLLAPSE_DURATION = 200L
 const val SWATCH_POP_DURATION = 400L
@@ -66,11 +67,9 @@ class LineToolSelector @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         canvas?.let {
             pencilIcon.draw(it)
         }
-
         if (showColors) palette.forEach { swatch ->
             swatchPaint.color = Color.parseColor(swatch.color)
             canvas?.drawCircle(width.toFloat() / 2, swatch.position, swatch.radius, swatchPaint)
@@ -109,11 +108,11 @@ class LineToolSelector @JvmOverloads constructor(
     }
 
     /**
-     * onMeasure used for tracking initial height of view and calculating radius
+     * onLayout used for tracking initial height of view and calculating radius
      * for turning card view into circle
      */
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
         if (originalHeight == 0f) {
             originalHeight = height.toFloat()
             radius = width.toFloat() / 2

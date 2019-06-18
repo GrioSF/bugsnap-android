@@ -70,15 +70,26 @@ jobs:
       - run:
           name: Build Library
           command: ./gradlew clean lib:assembleRelease --stacktrace
-      - store_artifacts:
-          path: lib/build/outputs/aar/
-          destination: ./artifacts
+      - run:
+          name: "Move Library Artifacts"
+          command: |
+            mkdir -p ./artifacts/
+            cp -R lib/build/outputs/aar/* ./artifacts/
       - run:
           name: Build Application
           command: ./gradlew clean app:assembleRelease --stacktrace
+      - run:
+          name: "Move Application Artifacts"
+          command: |
+            mkdir -p ./artifacts/
+            cp -R app/build/outputs/apk/release/* ./artifacts/
       - store_artifacts:
-          path: app/build/outputs/apk/
+          path: ./artifacts/
           destination: ./artifacts
+      - persist_to_workspace:
+          root: *workspace
+          paths:
+            - artifacts
 
   # Publishing to Github
   publish_tag_to_github:
@@ -91,16 +102,22 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             go get github.com/tcnksm/ghr
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/artifacts
 
 workflows:
   version: 2
-  workflow:
+  test-build-deploy:
     jobs:
-      - test_project
+      - test_project:
+          filters:
+            tags:
+              only: /^v.*/
       - build_project:
           requires:
             - test_project
+          filters:
+            tags:
+              only: /^v.*/
       - publish_tag_to_github:
           requires:
             - test_project
@@ -109,4 +126,4 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /.*/
+              only: /^v.*/
