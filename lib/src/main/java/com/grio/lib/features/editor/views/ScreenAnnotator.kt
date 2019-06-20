@@ -1,13 +1,11 @@
 package com.grio.lib.features.editor.views
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageView
 
 /**
  * View that allows for simple drawing onto the screen
@@ -19,6 +17,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     // Graphics
     private var brush = Paint()
     private var annotations = arrayListOf<Annotation>()
+    private val screenshot = ImageView(context)
 
     // State
     private var paintColor = "#000000"
@@ -27,7 +26,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var xCurrent = 0f
     private var yCurrent = 0f
 
-    lateinit var listener: Listener
+    private lateinit var listener: Listener
 
     init {
         brush.apply {
@@ -61,7 +60,15 @@ class ScreenAnnotator @JvmOverloads constructor(
         for (annotation in annotations) {
             brush.color = Color.parseColor(annotation.color)
             canvas?.drawPath(annotation.drawnPath, brush)
+
         }
+    }
+
+    /**
+     * Set screenshot to annotator
+     */
+    fun setScreenshot(screenshotToAnnotate: Bitmap?) {
+        screenshot.setImageBitmap(screenshotToAnnotate)
     }
 
     /**

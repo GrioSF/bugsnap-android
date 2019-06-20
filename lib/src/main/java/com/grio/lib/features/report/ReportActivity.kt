@@ -34,8 +34,6 @@ class ReportActivity : BaseActivity() {
         setContentView(R.layout.a_report)
         DaggerInjector.getComponent().inject(this)
 
-
-
         setupToolbar()
         setupScreenAnnotator()
         setScreenshotToHolder()
@@ -129,9 +127,7 @@ class ReportActivity : BaseActivity() {
      */
     private fun setScreenshotToHolder() {
         val bitmap = DataHolder.data
-        screenshotHolder.setImageBitmap(bitmap)
-
-
+        screenAnnotator.setScreenshot(bitmap)
     }
 
 
