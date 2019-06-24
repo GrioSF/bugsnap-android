@@ -15,24 +15,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-    <ImageView
-            android:id="@+id/screenshotHolder"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:scaleType="fitXY"
-            android:background="@android:color/white"
-            android:elevation="5dp"
-            android:contentDescription="@string/screenshot_of_bug"
-            app:layout_constraintBottom_toBottomOf="@id/guidelineBottom"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
-            app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
-            app:layout_constraintTop_toTopOf="@id/guidelineTop"/>
-
     <com.grio.lib.features.editor.views.ScreenAnnotator
             android:id="@+id/screenAnnotator"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:elevation="5dp"
+            android:background="@android:color/white"
             app:layout_constraintBottom_toBottomOf="@id/guidelineBottom"
             app:layout_constraintStart_toStartOf="@id/guidelineStart"
             app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
