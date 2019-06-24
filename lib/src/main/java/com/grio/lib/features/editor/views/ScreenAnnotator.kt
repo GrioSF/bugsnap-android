@@ -1,6 +1,7 @@
 package com.grio.lib.features.editor.views
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -8,6 +9,7 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.grio.lib.core.extension.screenshot
 
 /**
  * View that allows for simple drawing onto the screen
@@ -19,6 +21,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     // Graphics
     private var brush = Paint()
     private var annotations = arrayListOf<Annotation>()
+    private lateinit var originalScreenshot: Bitmap
 
     // State
     private var paintColor = "#000000"
@@ -27,7 +30,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var xCurrent = 0f
     private var yCurrent = 0f
 
-    lateinit var listener: Listener
+    private lateinit var listener: Listener
 
     init {
         brush.apply {
@@ -58,10 +61,29 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        if (::originalScreenshot.isInitialized) {
+            canvas?.drawBitmap(originalScreenshot, 0f, 0f, brush)
+        }
         for (annotation in annotations) {
             brush.color = Color.parseColor(annotation.color)
             canvas?.drawPath(annotation.drawnPath, brush)
         }
+    }
+
+    /**
+     * Set originalScreenshot to annotator
+     */
+    fun setScreenshot(screenshotToAnnotate: Bitmap?) {
+        screenshotToAnnotate?.let {
+            originalScreenshot = it
+        }
+    }
+
+    /**
+     * Retrieve the current view of the annotations made
+     */
+    fun getAnnotatedScreenshot(): Bitmap {
+        return this.screenshot()
     }
 
     /**
@@ -70,6 +92,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     interface Listener {
         // Fired when a line is drawn to the screen
         fun lineDrawn()
+
         // Fired when all lines drawn to screen have been removed
         fun canvasIsBlank()
     }
