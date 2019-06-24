@@ -17,7 +17,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     // Graphics
     private var brush = Paint()
     private var annotations = arrayListOf<Annotation>()
-    private val screenshot = ImageView(context)
+    private lateinit var screenshot: Bitmap
 
     // State
     private var paintColor = "#000000"
@@ -57,10 +57,13 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        if (::screenshot.isInitialized) {
+            canvas?.drawBitmap(screenshot, 0f, 0f, brush)
+        }
+
         for (annotation in annotations) {
             brush.color = Color.parseColor(annotation.color)
             canvas?.drawPath(annotation.drawnPath, brush)
-
         }
     }
 
@@ -68,7 +71,9 @@ class ScreenAnnotator @JvmOverloads constructor(
      * Set screenshot to annotator
      */
     fun setScreenshot(screenshotToAnnotate: Bitmap?) {
-        screenshot.setImageBitmap(screenshotToAnnotate)
+        screenshotToAnnotate?.let {
+            screenshot = it
+        }
     }
 
     /**
