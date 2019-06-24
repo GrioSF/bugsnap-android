@@ -5,7 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageView
+import com.grio.lib.core.extension.screenshot
 
 /**
  * View that allows for simple drawing onto the screen
@@ -17,7 +17,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     // Graphics
     private var brush = Paint()
     private var annotations = arrayListOf<Annotation>()
-    private lateinit var screenshot: Bitmap
+    private lateinit var originalScreenshot: Bitmap
 
     // State
     private var paintColor = "#000000"
@@ -57,10 +57,9 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        if (::screenshot.isInitialized) {
-            canvas?.drawBitmap(screenshot, 0f, 0f, brush)
+        if (::originalScreenshot.isInitialized) {
+            canvas?.drawBitmap(originalScreenshot, 0f, 0f, brush)
         }
-
         for (annotation in annotations) {
             brush.color = Color.parseColor(annotation.color)
             canvas?.drawPath(annotation.drawnPath, brush)
@@ -68,12 +67,19 @@ class ScreenAnnotator @JvmOverloads constructor(
     }
 
     /**
-     * Set screenshot to annotator
+     * Set originalScreenshot to annotator
      */
     fun setScreenshot(screenshotToAnnotate: Bitmap?) {
         screenshotToAnnotate?.let {
-            screenshot = it
+            originalScreenshot = it
         }
+    }
+
+    /**
+     * Retrieve the current view of the annotations made
+     */
+    fun getAnnotatedScreenshot(): Bitmap {
+        return this.screenshot()
     }
 
     /**
@@ -82,6 +88,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     interface Listener {
         // Fired when a line is drawn to the screen
         fun lineDrawn()
+
         // Fired when all lines drawn to screen have been removed
         fun canvasIsBlank()
     }
