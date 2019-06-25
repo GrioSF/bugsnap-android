@@ -5,25 +5,25 @@
     <item android:id="@+id/draw"
             android:icon="@drawable/pencil_icon"
             app:showAsAction="always"
-            android:title="Draw"/>
+            android:title="@string/draw"/>
 
     <item android:id="@+id/insertText"
             android:icon="@drawable/ic_font_download_black_24dp"
             app:showAsAction="always"
-            android:title="Text"/>
+            android:title="@string/text"/>
 
     <item android:id="@+id/insertShape"
             android:icon="@drawable/ic_shapes"
             app:showAsAction="always"
-            android:title="Shapes"/>
+            android:title="@string/shapes"/>
 
     <item android:id="@+id/delete"
             android:icon="@drawable/ic_delete"
             app:showAsAction="always"
-            android:title="Delete"/>
+            android:title="@string/delete"/>
 
     <item android:id="@+id/undo"
             android:icon="@drawable/undo"
             app:showAsAction="always"
-            android:title="Undo"/>
+            android:title="@string/undo"/>
 </menu>
