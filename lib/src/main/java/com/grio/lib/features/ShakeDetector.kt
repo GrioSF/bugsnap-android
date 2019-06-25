@@ -1,4 +1,4 @@
-package com.grio.lib.features.editor
+package com.grio.lib.features
 
 
 import android.hardware.Sensor

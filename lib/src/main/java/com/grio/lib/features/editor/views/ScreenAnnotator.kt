@@ -111,7 +111,9 @@ class ScreenAnnotator @JvmOverloads constructor(
         if (annotations.isNotEmpty()) {
             annotations.remove(annotations.last())
             if (annotations.isEmpty())
-                listener.canvasIsBlank()
+                if (::listener.isInitialized) {
+                    listener.canvasIsBlank()
+                }
             invalidate()
         }
     }
@@ -159,7 +161,9 @@ class ScreenAnnotator @JvmOverloads constructor(
             annotations.last().drawnPath.addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
             brush.style = Paint.Style.STROKE
         }
-        listener.lineDrawn()
+        if (::listener.isInitialized) {
+            listener.lineDrawn()
+        }
     }
 }
 

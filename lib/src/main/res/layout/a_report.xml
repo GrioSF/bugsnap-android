@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/reportActivityConstrainLayout"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,84 +8,39 @@
         android:background="#FFFFFF">
 
     <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/topToolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_gravity="top"/>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/toolSelector"
+            style="@style/Widget.MaterialComponents.BottomAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="bottom"
+            android:backgroundTint="@color/design_default_color_primary"
+            android:elevation="16dp"
+            android:gravity="bottom"
+            app:menu="@menu/menu_annotator"
+            app:fabAlignmentMode="end"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/confirmAnnotations"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_send"
+            android:elevation="12dp"
+            android:backgroundTint="#000000"
+            app:layout_anchor="@id/toolSelector"/>
 
     <com.grio.lib.features.editor.views.ScreenAnnotator
             android:id="@+id/screenAnnotator"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:elevation="5dp"
             android:background="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="@id/guidelineBottom"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
-            app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
-            app:layout_constraintTop_toTopOf="@id/guidelineTop"/>
+            android:scaleX=".8"
+            android:scaleY=".8"/>
 
-    <Button
-            android:id="@+id/finishEditing"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:elevation="5dp"
-            android:background="#009688"
-            android:textColor="#FFF"
-            android:text="@string/confirm"
-            android:contentDescription="@string/share_edited_screenshot"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <ImageButton
-            android:id="@+id/undo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:elevation="5dp"
-            android:background="@drawable/circular_undo_background"
-            android:contentDescription="@string/undo_last_drawing"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/guidelineTop"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-    <com.grio.lib.features.editor.views.LineToolSelector
-            android:id="@+id/lineSelector"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:layout_constraintStart_toEndOf="@id/guidelineEnd"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guidelineTop"/>
-
-    <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent=".1"/>
-
-    <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent=".9"/>
-
-    <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineStart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent=".05"/>
-
-    <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineEnd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent=".85"/>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
