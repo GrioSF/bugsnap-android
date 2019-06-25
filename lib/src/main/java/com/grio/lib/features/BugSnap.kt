@@ -9,11 +9,10 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import com.grio.lib.features.editor.ShakeDetector
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.screenshot
-import com.grio.lib.features.report.DataHolder
-import com.grio.lib.features.report.ReportActivity
+import com.grio.lib.features.editor.DataHolder
+import com.grio.lib.features.editor.ReportActivity
 
 
 /**

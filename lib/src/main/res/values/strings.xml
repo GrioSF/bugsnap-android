@@ -5,4 +5,9 @@
     <string name="undo_last_drawing">Undo last drawing</string>
     <string name="confirm">Confirm</string>
     <string name="label_send">Send</string>
+    <string name="undo">Undo</string>
+    <string name="delete">Delete</string>
+    <string name="shapes">Shapes</string>
+    <string name="text">Text</string>
+    <string name="draw">Draw</string>
 </resources>
