@@ -8,18 +8,18 @@ import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.R
 import com.grio.lib.core.platform.BaseActivity
 import com.grio.lib.features.report.ReportSummaryActivity
-import kotlinx.android.synthetic.main.a_report.*
+import kotlinx.android.synthetic.main.a_annotation.*
 import javax.inject.Inject
 
 
-class ReportActivity : BaseActivity() {
+class AnnotationActivity : BaseActivity() {
 
     @Inject
     lateinit var gson: Gson
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.a_report)
+        setContentView(R.layout.a_annotation)
         DaggerInjector.getComponent().inject(this)
         setupToolbar()
         setupScreenAnnotator()
