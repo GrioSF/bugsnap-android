@@ -2,20 +2,38 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+// Load keystore.properties file, in the rootProject folder.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.grio.bugsnap"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        // Version information is managed via gradle and is stored in version.properties
+        // Check README.md (or gradle commands) for more information
+        versionCode readVersionCode()
+        versionName readVersionName()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        release {
+            storeFile file("../upload.jks")
+            keyAlias "upload"
+            keyPassword keystoreProperties['keyPassword'] // located in keystore.properties
+            storePassword keystoreProperties['storePassword'] // located in keystore.properties
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         all {
             buildConfigField("String", "BUGSNAP_URL", getLocalProperty("bugsnap.url"))
@@ -48,4 +66,113 @@ dependencies {
 
     // Local BugSnap library.
     implementation project(":lib")
+}
+
+def readVersion() {
+    def versionFile = new File(project.rootDir, 'version.properties')
+    def version = new Properties()
+    def stream
+    try {
+        stream = new FileInputStream(versionFile)
+        version.load(stream)
+    } catch (FileNotFoundException ignore) {
+    } finally {
+        if (stream != null) stream.close()
+    }
+    if (!version['major']) version['major'] = "1"
+    if (!version['minor']) version['minor'] = "0"
+    if (!version['fix']) version['fix'] = "0"
+    if (!version['code']) version['code'] = "0"
+    return version
+}
+
+def readVersionName() {
+    def version = readVersion()
+    return "${version['major']}.${version['minor']}.${version['fix']}"
+}
+
+def readVersionCode() {
+    def version = readVersion()
+    def code = version['code'] as int
+    return code
+}
+
+def incrementVersionNumber(def type = "code") {
+    def versionFile = new File(project.rootDir, 'version.properties')
+
+    def version = readVersion()
+
+    def major = version['major'] as int
+    def minor = version['minor'] as int
+    def fix = version['fix'] as int
+    def code = version['code'] as int
+
+    if (type == 'major') {
+        major++
+        minor = 0
+        fix = 0
+    } else if (type == 'minor') {
+        minor++
+        fix = 0
+    }else if (type == 'fix') {
+        fix++
+    }
+
+    code++
+
+    version['major'] = major.toString()
+    version['minor'] = minor.toString()
+    version['fix'] = fix.toString()
+    version['code'] = code.toString()
+
+    def stream = new FileOutputStream(versionFile)
+    try {
+        version.store(stream, null)
+    } finally {
+        stream.close()
+    }
+
+    println "Build number is now..." + build
+
+    return major + "." + minor
+}
+
+task doMajorVersionIncrement {
+    doLast {
+        println "Incrementing major version..."
+        incrementVersionNumber('major')
+    }
+}
+
+task doMinorVersionIncrement {
+    doLast {
+        println "Incrementing minor version..."
+        incrementVersionNumber('minor')
+    }
+}
+
+task doFixVersionIncrement {
+    doLast {
+        println "Incrementing fix version..."
+        incrementVersionNumber('fix')
+    }
+}
+
+task doBuildNumberIncrement {
+    doLast {
+        println "Incrementing build number..."
+        incrementVersionNumber('code')
+    }
+}
+
+task doBuildNumberGet {
+    doLast {
+        println "Current app build is: " + readVersionCode()
+    }
+}
+
+task doVersionNumberGet {
+    doLast {
+        println "Current app version is: " + readVersionName()
+    }
 }

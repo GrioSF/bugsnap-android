@@ -1,0 +1,46 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Runs all library tests"
+  lane :libtest do
+    gradle(task: "lib:lint lib:test")
+  end
+
+  desc "Deploy a new artifact to jcenter"
+  lane :libdeploy do
+    gradle(task: "clean lib:assembleRelease")
+    # TODO: Upload to jcenter
+  end
+
+  desc "Runs all app tests"
+  lane :apptest do
+    gradle(task: "app:lint app:test")
+  end
+
+  desc "Submit a new internal build to Google Play"
+  lane :appbeta do
+    gradle(task: "clean app:bundleRelease")
+    upload_to_play_store(track: "internal")
+  end
+
+  desc "Deploy a new app version to Google Play"
+  lane :appdeploy do
+    gradle(task: "clean app:bundleRelease")
+    upload_to_play_store
+  end
+end
