@@ -12,7 +12,7 @@ import android.view.View
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.screenshot
 import com.grio.lib.features.editor.DataHolder
-import com.grio.lib.features.editor.ReportActivity
+import com.grio.lib.features.editor.AnnotationActivity
 
 
 /**
@@ -60,7 +60,7 @@ class BugSnap {
                              val rootView = activity?.window?.decorView as View
                              val bitmap = rootView.screenshot()
 
-                             val intent = Intent(activity, ReportActivity::class.java)
+                             val intent = Intent(activity, AnnotationActivity::class.java)
                              DataHolder.data = bitmap
                              activity.startActivity(intent)
 
