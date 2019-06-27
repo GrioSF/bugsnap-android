@@ -33,6 +33,14 @@
             android:backgroundTint="#000000"
             app:layout_anchor="@id/toolSelector"/>
 
+    <com.grio.lib.features.editor.views.ToolOptions
+            android:layout_width="30dp"
+            android:layout_height="100dp"
+            android:elevation="16dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="100dp"
+            android:background="@drawable/background_tool_options"/>
+
     <com.grio.lib.features.editor.views.ScreenAnnotator
             android:id="@+id/screenAnnotator"
             android:layout_width="wrap_content"
