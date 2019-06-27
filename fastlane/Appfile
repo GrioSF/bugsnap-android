@@ -1,0 +1,2 @@
+json_key_file ENV["JSON_SECRET"] # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("com.grio.bugsnap") # e.g. com.krausefx.app
