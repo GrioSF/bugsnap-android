@@ -1,14 +1,10 @@
 package com.grio.lib.features.editor.views
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.LinearLayout
-import android.view.animation.*
 
 
 class ToolOptions @JvmOverloads constructor(
@@ -21,10 +17,29 @@ class ToolOptions @JvmOverloads constructor(
     private val density = context.resources.displayMetrics.density.toInt()
     private var drawerState = DrawerState.CLOSED
 
-    private var palette = arrayListOf<Swatch>()
+    private var margin = 0
 
-    private var originalWidth = 0
+    private var palette = arrayListOf<Swatch>()
     private var arrowDimen = 12 * density
+
+    private lateinit var listener: Listener
+
+    /**
+     * Listens for color selections
+     */
+    interface Listener {
+        // Called when color is selected
+        fun clicked(margin: Int)
+    }
+
+    /**
+     * Sets listener for LineToolSelector
+     *
+     * @param listenerToSet listener to attach to this view
+     */
+    fun setToolOptionsListener(listenerToSet: Listener) {
+        this.listener = listenerToSet
+    }
 
     init {
         palette.add(Swatch("#000000", 0f, 0f))
@@ -39,9 +54,13 @@ class ToolOptions @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
-        if (originalWidth <= 0) {
-            originalWidth = width
-            arrowDimen = width/3
+
+        if (margin <= 0) {
+            arrowDimen = 12 * density
+            margin = 16 * density
+            layoutParams.width = context.resources.displayMetrics.widthPixels - margin
+            requestLayout()
+            invalidate()
         }
     }
 
@@ -71,45 +90,11 @@ class ToolOptions @JvmOverloads constructor(
     }
 
     private fun openDrawer() {
-        drawerState = DrawerState.ANIMATING
-        val screenWidth = context.resources.displayMetrics.widthPixels
-        val marginEnd = 16 * density
-        val widthAnimator = ValueAnimator.ofInt(originalWidth, screenWidth - marginEnd)
-        widthAnimator.duration = 500
-        widthAnimator.interpolator = DecelerateInterpolator(3f)
-        widthAnimator.addUpdateListener { valueAnimator ->
-            layoutParams.width = valueAnimator.animatedValue as Int
-            requestLayout()
-            invalidate()
-        }
-        widthAnimator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                super.onAnimationEnd(animation)
-                drawerState = DrawerState.OPENED
-                invalidate()
-            }
-        })
-        widthAnimator.start()
+        listener.clicked(16 * density)
     }
 
     private fun closeDrawer() {
-        drawerState = DrawerState.ANIMATING
-        val widthAnimator = ValueAnimator.ofInt(width, originalWidth)
-        widthAnimator.duration = 500
-        widthAnimator.interpolator = DecelerateInterpolator(3f)
-        widthAnimator.addUpdateListener { valueAnimator ->
-            layoutParams.width = valueAnimator.animatedValue as Int
-            requestLayout()
-            invalidate()
-        }
-        widthAnimator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                super.onAnimationEnd(animation)
-                drawerState = DrawerState.CLOSED
-                invalidate()
-            }
-        })
-        widthAnimator.start()
+        listener.clicked(16 * density)
     }
 }
 

@@ -9,14 +9,14 @@
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/topToolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="56dp"
             android:layout_gravity="top"/>
 
     <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/toolSelector"
             style="@style/Widget.MaterialComponents.BottomAppBar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="56dp"
             android:layout_gravity="bottom"
             android:backgroundTint="@color/design_default_color_primary"
             android:elevation="16dp"
@@ -33,21 +33,41 @@
             android:backgroundTint="#000000"
             app:layout_anchor="@id/toolSelector"/>
 
-    <com.grio.lib.features.editor.views.ToolOptions
-            android:layout_width="30dp"
-            android:layout_height="100dp"
-            android:elevation="16dp"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="100dp"
-            android:background="@drawable/background_tool_options"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/toolConstraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <com.grio.lib.features.editor.views.ScreenAnnotator
-            android:id="@+id/screenAnnotator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="5dp"
-            android:background="@android:color/white"
-            android:scaleX=".8"
-            android:scaleY=".8"/>
+        <com.grio.lib.features.editor.views.ScreenAnnotator
+                android:id="@+id/screenAnnotator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="5dp"
+                android:background="@android:color/white"
+                android:scaleX=".8"
+                android:scaleY=".8"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/toolCollapsedGuideline"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent=".92"/>
+
+        <com.grio.lib.features.editor.views.ToolOptions
+                android:id="@+id/toolOptions"
+                android:layout_width="200dp"
+                android:layout_height="100dp"
+                android:elevation="16dp"
+                android:layout_marginBottom="100dp"
+                android:background="@drawable/background_tool_options"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/toolCollapsedGuideline"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
