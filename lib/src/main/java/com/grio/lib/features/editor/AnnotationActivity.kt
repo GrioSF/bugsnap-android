@@ -24,9 +24,9 @@ class AnnotationActivity : BaseActivity() {
     @Inject
     lateinit var gson: Gson
 
-    val collapsedToolOptions = ConstraintSet()
-    val expandedToolOptions = ConstraintSet()
-    val toolOptionsTransition = ChangeBounds()
+    private val collapsedToolOptions = ConstraintSet()
+    private val expandedToolOptions = ConstraintSet()
+    private val toolOptionsTransition = ChangeBounds()
 
     var toolsShown = false
 
@@ -34,6 +34,16 @@ class AnnotationActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_annotation)
         DaggerInjector.getComponent().inject(this)
+        collapsedToolOptions.clone(toolConstraintLayout)
+        expandedToolOptions.clone(toolConstraintLayout)
+        expandedToolOptions.connect(
+            R.id.toolOptions, ConstraintSet.START,
+            ConstraintSet.PARENT_ID, ConstraintSet.START,
+            16 * resources.displayMetrics.density.toInt()
+        )
+        toolOptionsTransition.interpolator = DecelerateInterpolator(3f)
+        toolOptionsTransition.duration = 500
+
         setupToolbar()
         setupScreenAnnotator()
 
@@ -55,13 +65,6 @@ class AnnotationActivity : BaseActivity() {
             startActivity(Intent(this, ReportSummaryActivity::class.java))
         }
 
-        collapsedToolOptions.clone(toolConstraintLayout)
-        expandedToolOptions.clone(toolConstraintLayout)
-        expandedToolOptions.connect(R.id.toolOptions, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, 16 * resources.displayMetrics.density.toInt())
-
-        toolOptionsTransition.interpolator = DecelerateInterpolator(3f)
-        toolOptionsTransition.duration = 500
-
         toolOptions.setToolOptionsListener(object : ToolOptions.Listener {
 
             override fun strokeWidthSet(strokeWidth: Float) {
@@ -73,24 +76,28 @@ class AnnotationActivity : BaseActivity() {
             }
 
             override fun clicked(margin: Int) {
-                if (toolsShown) {
-                    toolOptions.setViewsToVisible(false)
-                    for (child in toolOptions.children) {
-                        child.animate().alpha(0.0f)
-                    }
-                    TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
-                    collapsedToolOptions.applyTo(toolConstraintLayout)
-                } else {
-                    toolOptions.setViewsToVisible(true)
-                    for (child in toolOptions.children) {
-                        child.animate().alpha(1.0f)
-                    }
-                    TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
-                    expandedToolOptions.applyTo(toolConstraintLayout)
-                }
+                if (toolsShown) hideToolOptions() else showToolOptions()
                 toolsShown = !toolsShown
             }
         })
+    }
+
+    private fun hideToolOptions() {
+        toolOptions.setViewsToVisible(false)
+        for (child in toolOptions.children) {
+            child.animate().alpha(0.0f)
+        }
+        TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
+        collapsedToolOptions.applyTo(toolConstraintLayout)
+    }
+
+    private fun showToolOptions() {
+        toolOptions.setViewsToVisible(true)
+        for (child in toolOptions.children) {
+            child.animate().alpha(1.0f)
+        }
+        TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
+        expandedToolOptions.applyTo(toolConstraintLayout)
     }
 
     /**
@@ -106,12 +113,8 @@ class AnnotationActivity : BaseActivity() {
      * Attaches Annotation Listener to show and hide undo button.
      */
     private fun setupScreenAnnotator() {
-        // TODO: Make this dynamic once new color picker is implemented
         screenAnnotator.setPaintColor("#000000")
-
-        // Attach screenshot to annotator
-        val bitmap = DataHolder.data
-        screenAnnotator.setScreenshot(bitmap)
+        screenAnnotator.setScreenshot(DataHolder.data)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
