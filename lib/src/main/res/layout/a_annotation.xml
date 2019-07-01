@@ -4,25 +4,14 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF">
+        android:background="#FFFFFF"
+        android:animateLayoutChanges="true">
 
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/topToolbar"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_gravity="top"/>
-
-    <com.google.android.material.bottomappbar.BottomAppBar
-            android:id="@+id/toolSelector"
-            style="@style/Widget.MaterialComponents.BottomAppBar"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_gravity="bottom"
-            android:backgroundTint="@color/design_default_color_primary"
-            android:elevation="16dp"
-            android:gravity="bottom"
-            app:menu="@menu/menu_annotator"
-            app:fabAlignmentMode="end"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/confirmAnnotations"
@@ -32,6 +21,16 @@
             android:elevation="12dp"
             android:backgroundTint="#000000"
             app:layout_anchor="@id/toolSelector"/>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/toolSelector"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom"
+            android:backgroundTint="@color/design_default_color_primary"
+            android:gravity="bottom"
+            app:menu="@menu/menu_annotator"
+            app:fabAlignmentMode="end"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/toolConstraintLayout"
@@ -60,13 +59,17 @@
 
         <com.grio.lib.features.editor.views.ToolOptions
                 android:id="@+id/toolOptions"
-                android:layout_width="200dp"
+                android:layout_width="0dp"
                 android:layout_height="100dp"
-                android:elevation="16dp"
                 android:layout_marginBottom="100dp"
+                android:elevation="16dp"
+                android:orientation="vertical"
                 android:background="@drawable/background_tool_options"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/toolCollapsedGuideline"/>
+                app:layout_constraintStart_toEndOf="@id/toolCollapsedGuideline"
+                app:layout_constraintEnd_toEndOf="parent">
+
+        </com.grio.lib.features.editor.views.ToolOptions>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

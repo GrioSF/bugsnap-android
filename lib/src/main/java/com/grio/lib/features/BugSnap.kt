@@ -63,7 +63,6 @@ class BugSnap {
                              val intent = Intent(activity, AnnotationActivity::class.java)
                              DataHolder.data = bitmap
                              activity.startActivity(intent)
-
                          }
                      })
 

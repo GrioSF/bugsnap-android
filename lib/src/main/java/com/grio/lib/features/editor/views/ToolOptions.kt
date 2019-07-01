@@ -1,10 +1,16 @@
 package com.grio.lib.features.editor.views
 
+import android.animation.LayoutTransition
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.MotionEvent
+import android.view.View
 import android.widget.LinearLayout
+import android.widget.SeekBar
+import androidx.core.view.marginStart
 
 
 class ToolOptions @JvmOverloads constructor(
@@ -19,10 +25,12 @@ class ToolOptions @JvmOverloads constructor(
 
     private var margin = 0
 
-    private var palette = arrayListOf<Swatch>()
     private var arrowDimen = 12 * density
 
     private lateinit var listener: Listener
+
+    private val colorPicker = ColorPicker(context)
+    private val slider = SeekBar(context)
 
     /**
      * Listens for color selections
@@ -30,6 +38,8 @@ class ToolOptions @JvmOverloads constructor(
     interface Listener {
         // Called when color is selected
         fun clicked(margin: Int)
+        fun colorSelected(color: String)
+        fun strokeWidthSet(strokeWidth: Float)
     }
 
     /**
@@ -41,15 +51,41 @@ class ToolOptions @JvmOverloads constructor(
         this.listener = listenerToSet
     }
 
+    fun setViewsToVisible(isVisible: Boolean) {
+        colorPicker.visibility = if (isVisible) VISIBLE else GONE
+        slider.visibility = if (isVisible) VISIBLE else GONE
+    }
+
     init {
-        palette.add(Swatch("#000000", 0f, 0f))
-        palette.add(Swatch("#FFFFFF", 0f, 0f))
-        palette.add(Swatch("#0536FF", 0f, 0f))
-        palette.add(Swatch("#3EB327", 0f, 0f))
-        palette.add(Swatch("#FFF404", 0f, 0f))
-        palette.add(Swatch("#FF6612", 0f, 0f))
-        palette.add(Swatch("#EA0000", 0f, 0f))
-        palette.add(Swatch("#9F00FF", 0f, 0f))
+        addView(colorPicker)
+        addView(slider)
+
+        colorPicker.id = View.generateViewId()
+        slider.id = View.generateViewId()
+
+        colorPicker.visibility = GONE
+        slider.visibility = GONE
+
+        colorPicker.setColorPickerListener(object : ColorPicker.Listener {
+            override fun colorPicked(color: String) {
+                listener.colorSelected(color)
+            }
+        })
+
+        slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                listener.strokeWidthSet(progress.toFloat())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // do nothing
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // do nothing
+            }
+
+        })
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -59,17 +95,27 @@ class ToolOptions @JvmOverloads constructor(
             arrowDimen = 12 * density
             margin = 16 * density
             layoutParams.width = context.resources.displayMetrics.widthPixels - margin
-            requestLayout()
-            invalidate()
+
+            val params = LayoutParams(LayoutParams.MATCH_PARENT, height / 2)
+            params.marginStart = arrowDimen * 4
+            params.marginEnd = arrowDimen * 4
+            params.gravity = Gravity.CENTER
+
+            slider.layoutParams = params
+            colorPicker.layoutParams = params
         }
     }
 
+
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        arrow?.setBounds(arrowDimen,
-            height/2-arrowDimen,
-            3*arrowDimen,
-            height/2+arrowDimen)
+        arrow?.setBounds(
+            arrowDimen,
+            height / 2 - arrowDimen,
+            3 * arrowDimen,
+            height / 2 + arrowDimen
+        )
         canvas?.let {
             arrow?.draw(it)
         }
@@ -101,9 +147,3 @@ class ToolOptions @JvmOverloads constructor(
 enum class DrawerState {
     OPENED, CLOSED, ANIMATING
 }
-
-data class Swatch(
-    val color: String,
-    var radius: Float = 0f,
-    var position: Float = 0f
-)

@@ -25,6 +25,7 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     // State
     private var paintColor = "#000000"
+    private var strokeWidth = 10f
     private var xStart = 0f
     private var yStart = 0f
     private var xCurrent = 0f
@@ -66,6 +67,7 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
         for (annotation in annotations) {
             brush.color = Color.parseColor(annotation.color)
+            brush.strokeWidth = annotation.strokeWidth
             canvas?.drawPath(annotation.drawnPath, brush)
         }
     }
@@ -122,6 +124,10 @@ class ScreenAnnotator @JvmOverloads constructor(
         paintColor = color
     }
 
+    fun setPaintStroke(strokeWidth: Float) {
+        this.strokeWidth = strokeWidth
+    }
+
     /**
      * Record when user touches the screen
      *
@@ -129,7 +135,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun startDrawing(x: Float, y: Float) {
-        annotations.add(Annotation(paintColor, Path()))
+        annotations.add(Annotation(paintColor, strokeWidth, Path()))
         annotations.last().drawnPath.moveTo(x, y)
         xStart = x
         yStart = y
@@ -169,5 +175,6 @@ class ScreenAnnotator @JvmOverloads constructor(
 
 data class Annotation(
     val color: String,
+    val strokeWidth: Float,
     val drawnPath: Path
 )

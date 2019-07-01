@@ -3,8 +3,10 @@ package com.grio.lib.features.editor
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.children
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import com.google.gson.Gson
@@ -21,6 +23,10 @@ class AnnotationActivity : BaseActivity() {
 
     @Inject
     lateinit var gson: Gson
+
+    val collapsedToolOptions = ConstraintSet()
+    val expandedToolOptions = ConstraintSet()
+    val toolOptionsTransition = ChangeBounds()
 
     var toolsShown = false
 
@@ -44,29 +50,44 @@ class AnnotationActivity : BaseActivity() {
         }
 
         confirmAnnotations.setOnClickListener {
-            // TODO: Update to transfer proper data to secondary Activity.
             // Launches the summary Activity.
             DataHolder.data = screenAnnotator.getAnnotatedScreenshot()
             startActivity(Intent(this, ReportSummaryActivity::class.java))
         }
 
-        toolOptions.setToolOptionsListener(object : ToolOptions.Listener {
-            override fun clicked(margin: Int) {
-                val constraintSet1 = ConstraintSet()
-                constraintSet1.clone(toolConstraintLayout)
-                val constraintSet2 = ConstraintSet()
-                constraintSet2.clone(toolConstraintLayout)
-                if (toolsShown) {
-                    constraintSet2.connect(R.id.toolOptions, ConstraintSet.START, R.id.toolCollapsedGuideline, ConstraintSet.START, 0)
-                } else {
-                    constraintSet2.connect(R.id.toolOptions, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, margin)
-                }
+        collapsedToolOptions.clone(toolConstraintLayout)
+        expandedToolOptions.clone(toolConstraintLayout)
+        expandedToolOptions.connect(R.id.toolOptions, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, 16 * resources.displayMetrics.density.toInt())
 
-                val transition = ChangeBounds()
-                transition.interpolator = DecelerateInterpolator(3f)
-                transition.duration = 500
-                TransitionManager.beginDelayedTransition(toolConstraintLayout, transition)
-                constraintSet2.applyTo(toolConstraintLayout)
+        toolOptionsTransition.interpolator = DecelerateInterpolator(3f)
+        toolOptionsTransition.duration = 500
+
+        toolOptions.setToolOptionsListener(object : ToolOptions.Listener {
+
+            override fun strokeWidthSet(strokeWidth: Float) {
+                screenAnnotator.setPaintStroke(strokeWidth)
+            }
+
+            override fun colorSelected(color: String) {
+                screenAnnotator.setPaintColor(color)
+            }
+
+            override fun clicked(margin: Int) {
+                if (toolsShown) {
+                    toolOptions.setViewsToVisible(false)
+                    for (child in toolOptions.children) {
+                        child.animate().alpha(0.0f)
+                    }
+                    TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
+                    collapsedToolOptions.applyTo(toolConstraintLayout)
+                } else {
+                    toolOptions.setViewsToVisible(true)
+                    for (child in toolOptions.children) {
+                        child.animate().alpha(1.0f)
+                    }
+                    TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
+                    expandedToolOptions.applyTo(toolConstraintLayout)
+                }
                 toolsShown = !toolsShown
             }
         })
