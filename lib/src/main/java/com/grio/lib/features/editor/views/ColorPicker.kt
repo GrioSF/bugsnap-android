@@ -8,6 +8,11 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
+const val STROKE_THICKNESS = 4f
+const val HIGHLIGHT_SPACING_FROM_SWATCH = 8f
+const val PALETTE_SPACING_FACTOR = 3
+const val INITIAL_SWATCH_OFFSET_FACTOR = 1.75f
+
 class ColorPicker @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -16,16 +21,27 @@ class ColorPicker @JvmOverloads constructor(
 
     private var palette = arrayListOf<Swatch>()
     private var radius = 0
-    private var paint = Paint()
+    private var swatchPaint = Paint()
+    private var highlightPaint = Paint()
     private lateinit var listener: Listener
+    private var selectedColorIndex = 0
 
     init {
-        paint.apply {
+        highlightPaint.apply {
+            style = Paint.Style.STROKE
+            isAntiAlias = true
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = STROKE_THICKNESS
+            color = Color.WHITE
+        }
+
+        swatchPaint.apply {
             style = Paint.Style.FILL
             isAntiAlias = true
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = 4f
+            strokeWidth = STROKE_THICKNESS
         }
 
         palette.add(Swatch("#000000"))
@@ -38,19 +54,34 @@ class ColorPicker @JvmOverloads constructor(
         palette.add(Swatch("#9F00FF"))
     }
 
+    /**
+     * Listens for color changes
+     */
     interface Listener {
+        // Fires when color is picked
         fun colorPicked(color: String)
+    }
+
+    /**
+     * Sets listener for ColorPicker
+     *
+     * @param listenerToSet listener to attach to this view
+     */
+    fun setColorPickerListener(listenerToSet: Listener) {
+        this.listener = listenerToSet
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
 
-        radius = width/(palette.size*3)
+        // Calculate radius based on screen size
+        radius = width / (palette.size * PALETTE_SPACING_FACTOR)
 
-        var position = radius.toFloat() * 1.75f
+        // Calculate swatch positions and sizes based on screen size
+        var position = radius.toFloat() * INITIAL_SWATCH_OFFSET_FACTOR
         for (swatch in palette) {
             swatch.position = position
-            position += radius * 3
+            position += radius * PALETTE_SPACING_FACTOR
         }
     }
 
@@ -64,24 +95,36 @@ class ColorPicker @JvmOverloads constructor(
         return super.onTouchEvent(event)
     }
 
+    /**
+     * Detect which color was selected
+     *
+     * @param x the x coordinate of the touch onto the view
+     */
     private fun getColorForTouch(x: Float): String {
-        for (swatch in palette) {
+        for ((index, swatch) in palette.withIndex()) {
             if (x > swatch.position - radius && x < swatch.position + radius) {
+                selectedColorIndex = index
+                invalidate()
                 return swatch.color
             }
         }
         return "#000000"
     }
 
-    fun setColorPickerListener(listenerToSet: Listener) {
-        this.listener = listenerToSet
-    }
-
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        for (swatch in palette) {
-            paint.color = Color.parseColor(swatch.color)
-            canvas?.drawCircle(swatch.position, height/2.toFloat(), radius.toFloat(), paint)
+        for ((index, swatch) in palette.withIndex()) {
+            swatchPaint.color = Color.parseColor(swatch.color)
+            canvas?.drawCircle(swatch.position, height / 2.toFloat(), radius.toFloat(), swatchPaint)
+
+            if (index == selectedColorIndex) {
+                canvas?.drawCircle(
+                    swatch.position,
+                    height / 2.toFloat(),
+                    radius.toFloat() + HIGHLIGHT_SPACING_FROM_SWATCH,
+                    highlightPaint
+                )
+            }
         }
     }
 }

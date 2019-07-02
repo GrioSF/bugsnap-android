@@ -36,7 +36,6 @@ class ToolOptions @JvmOverloads constructor(
                 listener.colorSelected(color)
             }
         })
-
         slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 listener.strokeWidthSet(progress.toFloat())
@@ -58,8 +57,10 @@ class ToolOptions @JvmOverloads constructor(
     interface Listener {
         // Called when view is toggleDrawer
         fun toggleDrawer(margin: Int)
+
         // Called when color is selected
         fun colorSelected(color: String)
+
         // Called when stroke width is set
         fun strokeWidthSet(strokeWidth: Float)
     }

@@ -11,6 +11,8 @@ import androidx.transition.TransitionManager
 import com.google.gson.Gson
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.R
+import com.grio.lib.core.extension.observe
+import com.grio.lib.core.extension.viewModels
 import com.grio.lib.core.platform.BaseActivity
 import com.grio.lib.features.editor.views.ScreenAnnotator
 import com.grio.lib.features.editor.views.ToolOptions
@@ -18,6 +20,9 @@ import com.grio.lib.features.report.ReportSummaryActivity
 import kotlinx.android.synthetic.main.a_annotation.*
 import javax.inject.Inject
 
+const val TOOL_OPTIONS_DRAWER_MARGIN = 16
+const val TOOL_OPTIONS_DRAWER_ANIMATION_DURATION = 500L
+const val TOOL_OPTIONS_DECELERATE_FACTOR = 3f
 
 class AnnotationActivity : BaseActivity() {
 
@@ -28,38 +33,33 @@ class AnnotationActivity : BaseActivity() {
     private val expandedToolOptions = ConstraintSet()
     private val toolOptionsTransition = ChangeBounds()
 
-    var toolsShown = false
+    private lateinit var viewModel: AnnotationViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_annotation)
         DaggerInjector.getComponent().inject(this)
-        collapsedToolOptions.clone(toolConstraintLayout)
-        expandedToolOptions.clone(toolConstraintLayout)
-        expandedToolOptions.connect(
-            R.id.toolOptions, ConstraintSet.START,
-            ConstraintSet.PARENT_ID, ConstraintSet.START,
-            16 * resources.displayMetrics.density.toInt()
-        )
-        toolOptionsTransition.interpolator = DecelerateInterpolator(3f)
-        toolOptionsTransition.duration = 500
+
+        viewModel = viewModels(viewModelFactory) {
+            observe(toolOptionsShown, ::handleToolOptions)
+        }
+        viewModel.toolOptionsShown.value = false
 
         setupToolbar()
-        setupScreenAnnotator()
+        setupToolOptionsDrawerAnimations()
+        screenAnnotator.setScreenshot(DataHolder.data)
 
+        // Screen annotator event listener
         screenAnnotator.setEventListener(object : ScreenAnnotator.Listener {
             override fun beginDrawing() {
-                if (toolsShown) toggleToolOptions()
+                viewModel.beganDrawing()
             }
         })
 
+        // BottomAppBar menu item click listener
         toolSelector.setOnMenuItemClickListener {
             when {
-                it.itemId == R.id.draw -> {
-                    if (!toolsShown) {
-                        toggleToolOptions()
-                    }
-                }
+                it.itemId == R.id.draw -> viewModel.selectedPenTool()
                 //it.itemId == R.id.insertText ->
                 //it.itemId == R.id.insertShape ->
                 //it.itemId = R.id.delete ->
@@ -69,12 +69,7 @@ class AnnotationActivity : BaseActivity() {
             return@setOnMenuItemClickListener true
         }
 
-        confirmAnnotations.setOnClickListener {
-            // Launches the summary Activity.
-            DataHolder.data = screenAnnotator.getAnnotatedScreenshot()
-            startActivity(Intent(this, ReportSummaryActivity::class.java))
-        }
-
+        // Tool options drawer state listener
         toolOptions.setToolOptionsListener(object : ToolOptions.Listener {
 
             override fun strokeWidthSet(strokeWidth: Float) {
@@ -86,9 +81,47 @@ class AnnotationActivity : BaseActivity() {
             }
 
             override fun toggleDrawer(margin: Int) {
-                toggleToolOptions()
+                viewModel.toggleToolOptionsDrawer()
             }
         })
+
+        // Confirmation button click listener
+        confirmAnnotations.setOnClickListener {
+            // Launches the summary Activity.
+            DataHolder.data = screenAnnotator.getAnnotatedScreenshot()
+            startActivity(Intent(this, ReportSummaryActivity::class.java))
+        }
+    }
+
+    /**
+     * Shows and hides the tool options
+     */
+    private fun handleToolOptions(isShown: Boolean?) {
+        isShown?.let {
+            toolOptions.setChildrenToVisible(it)
+            for (child in toolOptions.children) {
+                child.animate().alpha(if (isShown) 1.0f else 0.0f)
+            }
+            TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
+            if (isShown) expandedToolOptions.applyTo(toolConstraintLayout) else collapsedToolOptions.applyTo(
+                toolConstraintLayout
+            )
+        }
+    }
+
+    /**
+     * Setup constraint sets for tool options drawer animations
+     */
+    private fun setupToolOptionsDrawerAnimations() {
+        collapsedToolOptions.clone(toolConstraintLayout)
+        expandedToolOptions.clone(toolConstraintLayout)
+        expandedToolOptions.connect(
+            R.id.toolOptions, ConstraintSet.START,
+            ConstraintSet.PARENT_ID, ConstraintSet.START,
+            TOOL_OPTIONS_DRAWER_MARGIN * resources.displayMetrics.density.toInt()
+        )
+        toolOptionsTransition.interpolator = DecelerateInterpolator(TOOL_OPTIONS_DECELERATE_FACTOR)
+        toolOptionsTransition.duration = TOOL_OPTIONS_DRAWER_ANIMATION_DURATION
     }
 
     /**
@@ -98,27 +131,6 @@ class AnnotationActivity : BaseActivity() {
         setSupportActionBar(topToolbar)
         supportActionBar?.title = getString(R.string.report_a_bug)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
-    /**
-     * Attaches Annotation Listener to show and hide undo button.
-     */
-    private fun setupScreenAnnotator() {
-        screenAnnotator.setPaintColor("#000000")
-        screenAnnotator.setScreenshot(DataHolder.data)
-    }
-
-    /**
-     * Shows and hides the tool options
-     */
-    private fun toggleToolOptions() {
-        toolOptions.setChildrenToVisible(!toolsShown)
-        for (child in toolOptions.children) {
-            child.animate().alpha(if (toolsShown) 0.0f else 1.0f)
-        }
-        TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
-        if (toolsShown) collapsedToolOptions.applyTo(toolConstraintLayout) else expandedToolOptions.applyTo(toolConstraintLayout)
-        toolsShown = !toolsShown
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
