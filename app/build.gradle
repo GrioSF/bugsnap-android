@@ -39,7 +39,10 @@ android {
             buildConfigField("String", "BUGSNAP_URL", getLocalProperty("bugsnap.url"))
             buildConfigField("String", "BUGSNAP_PROJECT_NAME", getLocalProperty("bugsnap.projectName"))
         }
-
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
