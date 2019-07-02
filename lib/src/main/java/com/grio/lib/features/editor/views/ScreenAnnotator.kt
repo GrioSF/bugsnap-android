@@ -92,11 +92,8 @@ class ScreenAnnotator @JvmOverloads constructor(
      * Listens for Annotation Events
      */
     interface Listener {
-        // Fired when a line is drawn to the screen
-        fun lineDrawn()
-
-        // Fired when all lines drawn to screen have been removed
-        fun canvasIsBlank()
+        // Fired when user begins to draw on screen
+        fun beginDrawing()
     }
 
     /**
@@ -112,12 +109,8 @@ class ScreenAnnotator @JvmOverloads constructor(
     fun undo() {
         if (annotations.isNotEmpty()) {
             annotations.remove(annotations.last())
-            if (annotations.isEmpty())
-                if (::listener.isInitialized) {
-                    listener.canvasIsBlank()
-                }
-            invalidate()
         }
+        invalidate()
     }
 
     fun setPaintColor(color: String) {
@@ -135,6 +128,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun startDrawing(x: Float, y: Float) {
+        listener.beginDrawing()
         annotations.add(Annotation(paintColor, strokeWidth, Path()))
         annotations.last().drawnPath.moveTo(x, y)
         xStart = x
@@ -166,9 +160,6 @@ class ScreenAnnotator @JvmOverloads constructor(
             brush.style = Paint.Style.FILL
             annotations.last().drawnPath.addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
             brush.style = Paint.Style.STROKE
-        }
-        if (::listener.isInitialized) {
-            listener.lineDrawn()
         }
     }
 }

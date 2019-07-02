@@ -17,7 +17,6 @@ class ColorPicker @JvmOverloads constructor(
     private var palette = arrayListOf<Swatch>()
     private var radius = 0
     private var paint = Paint()
-
     private lateinit var listener: Listener
 
     init {
@@ -48,7 +47,7 @@ class ColorPicker @JvmOverloads constructor(
 
         radius = width/(palette.size*3)
 
-        var position = radius.toFloat()
+        var position = radius.toFloat() * 1.75f
         for (swatch in palette) {
             swatch.position = position
             position += radius * 3
@@ -85,7 +84,6 @@ class ColorPicker @JvmOverloads constructor(
             canvas?.drawCircle(swatch.position, height/2.toFloat(), radius.toFloat(), paint)
         }
     }
-
 }
 
 data class Swatch(

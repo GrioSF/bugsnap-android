@@ -1,17 +1,15 @@
 package com.grio.lib.features.editor.views
 
-import android.animation.LayoutTransition
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.SeekBar
-import androidx.core.view.marginStart
 
+const val ARROW_DIMENSION = 12
+const val ARROW_MARGIN = 16
 
 class ToolOptions @JvmOverloads constructor(
     context: Context,
@@ -21,48 +19,15 @@ class ToolOptions @JvmOverloads constructor(
 
     private val arrow = context.getDrawable(com.grio.lib.R.drawable.ic_keyboard_arrow_left_white_24dp)
     private val density = context.resources.displayMetrics.density.toInt()
-    private var drawerState = DrawerState.CLOSED
-
     private var margin = 0
-
-    private var arrowDimen = 12 * density
-
-    private lateinit var listener: Listener
-
+    private var arrowDimen = ARROW_DIMENSION * density
     private val colorPicker = ColorPicker(context)
     private val slider = SeekBar(context)
-
-    /**
-     * Listens for color selections
-     */
-    interface Listener {
-        // Called when color is selected
-        fun clicked(margin: Int)
-        fun colorSelected(color: String)
-        fun strokeWidthSet(strokeWidth: Float)
-    }
-
-    /**
-     * Sets listener for LineToolSelector
-     *
-     * @param listenerToSet listener to attach to this view
-     */
-    fun setToolOptionsListener(listenerToSet: Listener) {
-        this.listener = listenerToSet
-    }
-
-    fun setViewsToVisible(isVisible: Boolean) {
-        colorPicker.visibility = if (isVisible) VISIBLE else GONE
-        slider.visibility = if (isVisible) VISIBLE else GONE
-    }
+    private lateinit var listener: Listener
 
     init {
         addView(colorPicker)
         addView(slider)
-
-        colorPicker.id = View.generateViewId()
-        slider.id = View.generateViewId()
-
         colorPicker.visibility = GONE
         slider.visibility = GONE
 
@@ -84,16 +49,44 @@ class ToolOptions @JvmOverloads constructor(
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 // do nothing
             }
-
         })
+    }
+
+    /**
+     * Listens for tool options changes
+     */
+    interface Listener {
+        // Called when view is toggleDrawer
+        fun toggleDrawer(margin: Int)
+        // Called when color is selected
+        fun colorSelected(color: String)
+        // Called when stroke width is set
+        fun strokeWidthSet(strokeWidth: Float)
+    }
+
+    /**
+     * Sets listener for LineToolSelector
+     *
+     * @param listenerToSet listener to attach to this view
+     */
+    fun setToolOptionsListener(listenerToSet: Listener) {
+        this.listener = listenerToSet
+    }
+
+    /**
+     * Sets children of the tool options to be gone when off screen
+     */
+    fun setChildrenToVisible(isVisible: Boolean) {
+        colorPicker.visibility = if (isVisible) VISIBLE else GONE
+        slider.visibility = if (isVisible) VISIBLE else GONE
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
 
         if (margin <= 0) {
-            arrowDimen = 12 * density
-            margin = 16 * density
+            arrowDimen = ARROW_DIMENSION * density
+            margin = ARROW_MARGIN * density
             layoutParams.width = context.resources.displayMetrics.widthPixels - margin
 
             val params = LayoutParams(LayoutParams.MATCH_PARENT, height / 2)
@@ -105,8 +98,6 @@ class ToolOptions @JvmOverloads constructor(
             colorPicker.layoutParams = params
         }
     }
-
-
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -124,26 +115,8 @@ class ToolOptions @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> return true
-            MotionEvent.ACTION_UP -> {
-                if (drawerState == DrawerState.CLOSED) {
-                    openDrawer()
-                } else if (drawerState == DrawerState.OPENED) {
-                    closeDrawer()
-                }
-            }
+            MotionEvent.ACTION_UP -> listener.toggleDrawer(ARROW_MARGIN * density)
         }
         return super.onTouchEvent(event)
     }
-
-    private fun openDrawer() {
-        listener.clicked(16 * density)
-    }
-
-    private fun closeDrawer() {
-        listener.clicked(16 * density)
-    }
-}
-
-enum class DrawerState {
-    OPENED, CLOSED, ANIMATING
 }

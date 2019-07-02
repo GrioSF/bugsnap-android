@@ -3,7 +3,6 @@ package com.grio.lib.features.editor
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
@@ -13,6 +12,7 @@ import com.google.gson.Gson
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.R
 import com.grio.lib.core.platform.BaseActivity
+import com.grio.lib.features.editor.views.ScreenAnnotator
 import com.grio.lib.features.editor.views.ToolOptions
 import com.grio.lib.features.report.ReportSummaryActivity
 import kotlinx.android.synthetic.main.a_annotation.*
@@ -47,9 +47,19 @@ class AnnotationActivity : BaseActivity() {
         setupToolbar()
         setupScreenAnnotator()
 
+        screenAnnotator.setEventListener(object : ScreenAnnotator.Listener {
+            override fun beginDrawing() {
+                if (toolsShown) toggleToolOptions()
+            }
+        })
+
         toolSelector.setOnMenuItemClickListener {
             when {
-                //it.itemId == R.id.draw ->
+                it.itemId == R.id.draw -> {
+                    if (!toolsShown) {
+                        toggleToolOptions()
+                    }
+                }
                 //it.itemId == R.id.insertText ->
                 //it.itemId == R.id.insertShape ->
                 //it.itemId = R.id.delete ->
@@ -75,29 +85,10 @@ class AnnotationActivity : BaseActivity() {
                 screenAnnotator.setPaintColor(color)
             }
 
-            override fun clicked(margin: Int) {
-                if (toolsShown) hideToolOptions() else showToolOptions()
-                toolsShown = !toolsShown
+            override fun toggleDrawer(margin: Int) {
+                toggleToolOptions()
             }
         })
-    }
-
-    private fun hideToolOptions() {
-        toolOptions.setViewsToVisible(false)
-        for (child in toolOptions.children) {
-            child.animate().alpha(0.0f)
-        }
-        TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
-        collapsedToolOptions.applyTo(toolConstraintLayout)
-    }
-
-    private fun showToolOptions() {
-        toolOptions.setViewsToVisible(true)
-        for (child in toolOptions.children) {
-            child.animate().alpha(1.0f)
-        }
-        TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
-        expandedToolOptions.applyTo(toolConstraintLayout)
     }
 
     /**
@@ -105,7 +96,7 @@ class AnnotationActivity : BaseActivity() {
      */
     private fun setupToolbar() {
         setSupportActionBar(topToolbar)
-        supportActionBar?.title = "Report a bug"
+        supportActionBar?.title = getString(R.string.report_a_bug)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
@@ -115,6 +106,19 @@ class AnnotationActivity : BaseActivity() {
     private fun setupScreenAnnotator() {
         screenAnnotator.setPaintColor("#000000")
         screenAnnotator.setScreenshot(DataHolder.data)
+    }
+
+    /**
+     * Shows and hides the tool options
+     */
+    private fun toggleToolOptions() {
+        toolOptions.setChildrenToVisible(!toolsShown)
+        for (child in toolOptions.children) {
+            child.animate().alpha(if (toolsShown) 0.0f else 1.0f)
+        }
+        TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
+        if (toolsShown) collapsedToolOptions.applyTo(toolConstraintLayout) else expandedToolOptions.applyTo(toolConstraintLayout)
+        toolsShown = !toolsShown
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
