@@ -21,16 +21,17 @@ class ScreenAnnotator @JvmOverloads constructor(
     // Graphics
     private var brush = Paint()
     private var annotations = arrayListOf<Annotation>()
-    private lateinit var originalScreenshot: Bitmap
+    lateinit var originalScreenshot: Bitmap
 
     // State
-    private var paintColor = "#000000"
+    var paintColor = "#000000"
+    var strokeWidth = 10f
     private var xStart = 0f
     private var yStart = 0f
     private var xCurrent = 0f
     private var yCurrent = 0f
 
-    private lateinit var listener: Listener
+    lateinit var listener: Listener
 
     init {
         brush.apply {
@@ -66,16 +67,8 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
         for (annotation in annotations) {
             brush.color = Color.parseColor(annotation.color)
+            brush.strokeWidth = annotation.strokeWidth
             canvas?.drawPath(annotation.drawnPath, brush)
-        }
-    }
-
-    /**
-     * Set originalScreenshot to annotator
-     */
-    fun setScreenshot(screenshotToAnnotate: Bitmap?) {
-        screenshotToAnnotate?.let {
-            originalScreenshot = it
         }
     }
 
@@ -90,18 +83,8 @@ class ScreenAnnotator @JvmOverloads constructor(
      * Listens for Annotation Events
      */
     interface Listener {
-        // Fired when a line is drawn to the screen
-        fun lineDrawn()
-
-        // Fired when all lines drawn to screen have been removed
-        fun canvasIsBlank()
-    }
-
-    /**
-     * Sets listener for ScreenAnnotator
-     */
-    fun setEventListener(listener: Listener) {
-        this.listener = listener
+        // Fired when user begins to draw on screen
+        fun beginDrawing()
     }
 
     /**
@@ -110,16 +93,8 @@ class ScreenAnnotator @JvmOverloads constructor(
     fun undo() {
         if (annotations.isNotEmpty()) {
             annotations.remove(annotations.last())
-            if (annotations.isEmpty())
-                if (::listener.isInitialized) {
-                    listener.canvasIsBlank()
-                }
-            invalidate()
         }
-    }
-
-    fun setPaintColor(color: String) {
-        paintColor = color
+        invalidate()
     }
 
     /**
@@ -129,7 +104,8 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun startDrawing(x: Float, y: Float) {
-        annotations.add(Annotation(paintColor, Path()))
+        listener.beginDrawing()
+        annotations.add(Annotation(paintColor, strokeWidth, Path()))
         annotations.last().drawnPath.moveTo(x, y)
         xStart = x
         yStart = y
@@ -157,17 +133,13 @@ class ScreenAnnotator @JvmOverloads constructor(
 
         // If user taps screen, create a dot
         if (xStart == xCurrent && yStart == yCurrent) {
-            brush.style = Paint.Style.FILL
             annotations.last().drawnPath.addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
-            brush.style = Paint.Style.STROKE
-        }
-        if (::listener.isInitialized) {
-            listener.lineDrawn()
         }
     }
 }
 
 data class Annotation(
     val color: String,
+    val strokeWidth: Float,
     val drawnPath: Path
 )

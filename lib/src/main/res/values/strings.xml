@@ -10,4 +10,5 @@
     <string name="shapes">Shapes</string>
     <string name="text">Text</string>
     <string name="draw">Draw</string>
+    <string name="report_a_bug">Report a bug</string>
 </resources>
