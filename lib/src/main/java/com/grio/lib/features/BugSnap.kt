@@ -7,12 +7,13 @@ import android.content.Context.SENSOR_SERVICE
 import android.content.Intent
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.screenshot
 import com.grio.lib.features.editor.DataHolder
-import com.grio.lib.features.editor.AnnotationActivity
+import com.grio.lib.features.editor.EditorActivity
 
 
 /**
@@ -27,17 +28,24 @@ class BugSnap {
 
         lateinit var jiraUrl: String
         lateinit var jiraProjectName: String
+        lateinit var jiraProjectKey: String
+        lateinit var jiraUsername: String
+        lateinit var jiraApiKey: String
 
         /**
          * Initializes the library.
          * @param context The application's context.
          */
         @JvmStatic
-        fun init(context: Context, jiraUrl: String, jiraProjectName: String) {
+        fun init(context: Context, jiraUrl: String, jiraProjectName: String,
+                 jiraProjectKey: String, jiraUsername: String, jiraApiKey: String) {
 
             // Set global fields.
             Companion.jiraUrl = jiraUrl
             Companion.jiraProjectName = jiraProjectName
+            Companion.jiraProjectKey = jiraProjectKey
+            Companion.jiraUsername = jiraUsername
+            Companion.jiraApiKey = jiraApiKey
 
             // Build object graph.
             DaggerInjector.buildComponent(context)
@@ -52,6 +60,19 @@ class BugSnap {
                 override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
                 override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
 
+
+                    //Debug only. Remove.
+//                    var handler = Handler()
+//                    handler.postDelayed({
+//                        val rootView = activity?.window?.decorView as View
+//                        val bitmap = rootView.screenshot()
+//
+//                        val intent = Intent(activity, EditorActivity::class.java)
+//                        DataHolder.data = bitmap
+//                        activity.startActivity(intent)
+//                    }, 1000)
+                    // END Debug
+
                     // Setup listener.
                      sd = ShakeDetector(object :
                          ShakeDetector.Listener {
@@ -60,7 +81,7 @@ class BugSnap {
                              val rootView = activity?.window?.decorView as View
                              val bitmap = rootView.screenshot()
 
-                             val intent = Intent(activity, AnnotationActivity::class.java)
+                             val intent = Intent(activity, EditorActivity::class.java)
                              DataHolder.data = bitmap
                              activity.startActivity(intent)
                          }

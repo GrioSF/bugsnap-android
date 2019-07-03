@@ -2,8 +2,7 @@ package com.grio.lib.core.di.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.grio.lib.features.editor.AnnotationViewModel
-import com.grio.lib.features.report.ReportSummaryViewModel
+import com.grio.lib.features.editor.EditorViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -16,12 +15,7 @@ abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(ReportSummaryViewModel::class)
-    abstract fun bindsReportSummaryViewModel(reportSummaryViewModel: ReportSummaryViewModel): ViewModel
-
-    @Binds
-    @IntoMap
-    @ViewModelKey(AnnotationViewModel::class)
-    abstract fun bindsAnnotationViewModel(annotationViewModel: AnnotationViewModel): ViewModel
+    @ViewModelKey(EditorViewModel::class)
+    abstract fun bindsAnnotationViewModel(editorViewModel: EditorViewModel): ViewModel
 
 }

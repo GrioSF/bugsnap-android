@@ -5,13 +5,17 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.grio.lib.features.BugSnap
 import com.grio.lib.BuildConfig
-import com.grio.lib.features.report.JiraRepository
+import com.grio.lib.features.editor.JiraRepository
 import dagger.Module
 import dagger.Provides
+import okhttp3.Credentials
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -56,10 +60,25 @@ class ApplicationModule(private val context: Context) {
             val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
             okHttpClientBuilder.addInterceptor(loggingInterceptor)
         }
+        okHttpClientBuilder.addInterceptor( BasicAuthInterceptor(BugSnap.jiraUsername, BugSnap.jiraApiKey))
         return okHttpClientBuilder.build()
     }
 
     @Provides
     @Singleton
     fun provideJiraRepository(dataSource: JiraRepository.Network): JiraRepository = dataSource
+}
+
+class BasicAuthInterceptor(user: String, password: String) : Interceptor {
+
+    private val credentials: String = Credentials.basic(user, password)
+
+    @Throws(IOException::class)
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        val authenticatedRequest = request.newBuilder()
+            .header("Authorization", credentials).build()
+        return chain.proceed(authenticatedRequest)
+    }
+
 }

@@ -15,12 +15,31 @@ import kotlinx.coroutines.*
  */
 abstract class UseCase<out Type, in Params> where Type : Any {
 
-    abstract suspend fun run(params: Params): Either<Failure, Type>
+    abstract suspend fun run(params: Params? = null): Either<Failure, Type>
 
 
-    operator fun invoke(params: Params, onResult: (Either<Failure, Type>) -> Unit = {}) {
+    operator fun invoke(params: Params?, onResult: (Either<Failure, Type>) -> Unit = {}) {
         val job = GlobalScope.async {
-            run(params)
+            if (params != null) {
+                run(params)
+            } else {
+                run()
+            }
+        }
+        MainScope().launch(Dispatchers.Main) { onResult(job.await()) }
+    }
+
+    class None
+}
+
+abstract class UseCaseNoParams<out Type> where Type : Any {
+
+    abstract suspend fun run(): Either<Failure, Type>
+
+
+    operator fun invoke(onResult: (Either<Failure, Type>) -> Unit = {}) {
+        val job = GlobalScope.async {
+            run()
         }
         MainScope().launch(Dispatchers.Main) { onResult(job.await()) }
     }

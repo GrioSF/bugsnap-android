@@ -38,6 +38,9 @@ android {
         all {
             buildConfigField("String", "BUGSNAP_URL", getLocalProperty("bugsnap.url"))
             buildConfigField("String", "BUGSNAP_PROJECT_NAME", getLocalProperty("bugsnap.projectName"))
+            buildConfigField("String", "BUGSNAP_PROJECT_KEY", getLocalProperty("bugsnap.projectKey"))
+            buildConfigField("String", "BUGSNAP_JIRA_USERNAME", getLocalProperty("bugsnap.jiraUsername"))
+            buildConfigField("String", "BUGSNAP_JIRA_API_KEY", getLocalProperty("bugsnap.jiraApiKey"))
         }
     }
     compileOptions {
