@@ -21,17 +21,17 @@ class ScreenAnnotator @JvmOverloads constructor(
     // Graphics
     private var brush = Paint()
     private var annotations = arrayListOf<Annotation>()
-    private lateinit var originalScreenshot: Bitmap
+    lateinit var originalScreenshot: Bitmap
 
     // State
-    private var paintColor = "#000000"
-    private var strokeWidth = 10f
+    var paintColor = "#000000"
+    var strokeWidth = 10f
     private var xStart = 0f
     private var yStart = 0f
     private var xCurrent = 0f
     private var yCurrent = 0f
 
-    private lateinit var listener: Listener
+    lateinit var listener: Listener
 
     init {
         brush.apply {
@@ -73,15 +73,6 @@ class ScreenAnnotator @JvmOverloads constructor(
     }
 
     /**
-     * Set originalScreenshot to annotator
-     */
-    fun setScreenshot(screenshotToAnnotate: Bitmap?) {
-        screenshotToAnnotate?.let {
-            originalScreenshot = it
-        }
-    }
-
-    /**
      * Retrieve the current view of the annotations made
      */
     fun getAnnotatedScreenshot(): Bitmap {
@@ -97,13 +88,6 @@ class ScreenAnnotator @JvmOverloads constructor(
     }
 
     /**
-     * Sets listener for ScreenAnnotator
-     */
-    fun setEventListener(listener: Listener) {
-        this.listener = listener
-    }
-
-    /**
      * Removes the last line drawn
      */
     fun undo() {
@@ -111,14 +95,6 @@ class ScreenAnnotator @JvmOverloads constructor(
             annotations.remove(annotations.last())
         }
         invalidate()
-    }
-
-    fun setPaintColor(color: String) {
-        paintColor = color
-    }
-
-    fun setPaintStroke(strokeWidth: Float) {
-        this.strokeWidth = strokeWidth
     }
 
     /**
@@ -157,9 +133,7 @@ class ScreenAnnotator @JvmOverloads constructor(
 
         // If user taps screen, create a dot
         if (xStart == xCurrent && yStart == yCurrent) {
-            brush.style = Paint.Style.FILL
             annotations.last().drawnPath.addCircle(xCurrent, yCurrent, 4f, Path.Direction.CW)
-            brush.style = Paint.Style.STROKE
         }
     }
 }

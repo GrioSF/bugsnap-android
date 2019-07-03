@@ -14,12 +14,4 @@ class AnnotationViewModel
             toolOptionsShown.value = !it
         }
     }
-
-    fun beganDrawing() {
-        toolOptionsShown.value = false
-    }
-
-    fun selectedPenTool() {
-        toolOptionsShown.value = true
-    }
 }

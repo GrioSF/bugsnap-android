@@ -47,19 +47,21 @@ class AnnotationActivity : BaseActivity() {
 
         setupToolbar()
         setupToolOptionsDrawerAnimations()
-        screenAnnotator.setScreenshot(DataHolder.data)
+        DataHolder.data?.let {
+            screenAnnotator.originalScreenshot = it
+        }
 
         // Screen annotator event listener
-        screenAnnotator.setEventListener(object : ScreenAnnotator.Listener {
+        screenAnnotator.listener = object : ScreenAnnotator.Listener {
             override fun beginDrawing() {
-                viewModel.beganDrawing()
+                viewModel.toolOptionsShown.value = false
             }
-        })
+        }
 
         // BottomAppBar menu item click listener
         toolSelector.setOnMenuItemClickListener {
             when {
-                it.itemId == R.id.draw -> viewModel.selectedPenTool()
+                it.itemId == R.id.draw -> viewModel.toolOptionsShown.value = true
                 //it.itemId == R.id.insertText ->
                 //it.itemId == R.id.insertShape ->
                 //it.itemId = R.id.delete ->
@@ -70,20 +72,20 @@ class AnnotationActivity : BaseActivity() {
         }
 
         // Tool options drawer state listener
-        toolOptions.setToolOptionsListener(object : ToolOptions.Listener {
+        toolOptions.listener = object : ToolOptions.Listener {
 
             override fun strokeWidthSet(strokeWidth: Float) {
-                screenAnnotator.setPaintStroke(strokeWidth)
+                screenAnnotator.strokeWidth = strokeWidth
             }
 
             override fun colorSelected(color: String) {
-                screenAnnotator.setPaintColor(color)
+                screenAnnotator.paintColor = color
             }
 
             override fun toggleDrawer(margin: Int) {
                 viewModel.toggleToolOptionsDrawer()
             }
-        })
+        }
 
         // Confirmation button click listener
         confirmAnnotations.setOnClickListener {

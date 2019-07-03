@@ -19,11 +19,14 @@ class ColorPicker @JvmOverloads constructor(
     defStyle: Int = 0
 ) : View(context, attrs, defStyle) {
 
-    private var palette = arrayListOf<Swatch>()
+    private var palette = arrayListOf(
+        Swatch("#000000"), Swatch("#FFFFFF"), Swatch("#0536FF"), Swatch("#3EB327"),
+        Swatch("#FFF404"), Swatch("#FF6612"), Swatch("#EA0000"), Swatch("#9F00FF")
+    )
     private var radius = 0
     private var swatchPaint = Paint()
     private var highlightPaint = Paint()
-    private lateinit var listener: Listener
+    lateinit var listener: Listener
     private var selectedColorIndex = 0
 
     init {
@@ -43,15 +46,6 @@ class ColorPicker @JvmOverloads constructor(
             strokeCap = Paint.Cap.ROUND
             strokeWidth = STROKE_THICKNESS
         }
-
-        palette.add(Swatch("#000000"))
-        palette.add(Swatch("#FFFFFF"))
-        palette.add(Swatch("#0536FF"))
-        palette.add(Swatch("#3EB327"))
-        palette.add(Swatch("#FFF404"))
-        palette.add(Swatch("#FF6612"))
-        palette.add(Swatch("#EA0000"))
-        palette.add(Swatch("#9F00FF"))
     }
 
     /**
@@ -62,15 +56,6 @@ class ColorPicker @JvmOverloads constructor(
         fun colorPicked(color: String)
     }
 
-    /**
-     * Sets listener for ColorPicker
-     *
-     * @param listenerToSet listener to attach to this view
-     */
-    fun setColorPickerListener(listenerToSet: Listener) {
-        this.listener = listenerToSet
-    }
-
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
 
@@ -79,7 +64,7 @@ class ColorPicker @JvmOverloads constructor(
 
         // Calculate swatch positions and sizes based on screen size
         var position = radius.toFloat() * INITIAL_SWATCH_OFFSET_FACTOR
-        for (swatch in palette) {
+        palette.forEach { swatch ->
             swatch.position = position
             position += radius * PALETTE_SPACING_FACTOR
         }
@@ -115,12 +100,12 @@ class ColorPicker @JvmOverloads constructor(
         super.onDraw(canvas)
         for ((index, swatch) in palette.withIndex()) {
             swatchPaint.color = Color.parseColor(swatch.color)
-            canvas?.drawCircle(swatch.position, height / 2.toFloat(), radius.toFloat(), swatchPaint)
+            canvas?.drawCircle(swatch.position, height / 2f, radius.toFloat(), swatchPaint)
 
             if (index == selectedColorIndex) {
                 canvas?.drawCircle(
                     swatch.position,
-                    height / 2.toFloat(),
+                    height / 2f,
                     radius.toFloat() + HIGHLIGHT_SPACING_FROM_SWATCH,
                     highlightPaint
                 )

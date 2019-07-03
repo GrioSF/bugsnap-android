@@ -23,7 +23,7 @@ class ToolOptions @JvmOverloads constructor(
     private var arrowDimen = ARROW_DIMENSION * density
     private val colorPicker = ColorPicker(context)
     private val slider = SeekBar(context)
-    private lateinit var listener: Listener
+    lateinit var listener: Listener
 
     init {
         addView(colorPicker)
@@ -31,11 +31,11 @@ class ToolOptions @JvmOverloads constructor(
         colorPicker.visibility = GONE
         slider.visibility = GONE
 
-        colorPicker.setColorPickerListener(object : ColorPicker.Listener {
+        colorPicker.listener = object : ColorPicker.Listener {
             override fun colorPicked(color: String) {
                 listener.colorSelected(color)
             }
-        })
+        }
         slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 listener.strokeWidthSet(progress.toFloat())
@@ -63,15 +63,6 @@ class ToolOptions @JvmOverloads constructor(
 
         // Called when stroke width is set
         fun strokeWidthSet(strokeWidth: Float)
-    }
-
-    /**
-     * Sets listener for LineToolSelector
-     *
-     * @param listenerToSet listener to attach to this view
-     */
-    fun setToolOptionsListener(listenerToSet: Listener) {
-        this.listener = listenerToSet
     }
 
     /**
