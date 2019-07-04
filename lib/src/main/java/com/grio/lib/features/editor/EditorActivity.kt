@@ -78,14 +78,8 @@ class EditorActivity : BaseActivity() {
                     screenAnnotator.currentTool = Tool.TEXT
                     viewModel.toolOptionsShown.value = true
                 }
-                it.itemId == R.id.insertShape -> {
-                    screenAnnotator.currentTool = Tool.SHAPE
-                    viewModel.toolOptionsShown.value = true
-                }
-                it.itemId == R.id.delete -> {
-                    if (screenAnnotator.attemptToSelectAnnotation)
-                        screenAnnotator.removeSelectedAnnotation()
-                }
+                //it.itemId == R.id.insertShape ->
+                //it.itemId = R.id.delete ->
                 it.itemId == R.id.undo -> screenAnnotator.undo()
 
             }
@@ -131,11 +125,7 @@ class EditorActivity : BaseActivity() {
                 Toast.makeText(this@EditorActivity, "Summary must not be empty.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            viewModel.addButtonClicked(
-                summary_input.text.toString(),
-                description_input.text.toString(),
-                DataHolder.toFile(this)
-            )
+            viewModel.addButtonClicked(summary_input.text.toString(), description_input.text.toString(), DataHolder.toFile(this))
         }
 
         // Cancel button listener.
@@ -198,7 +188,8 @@ class EditorActivity : BaseActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-        return (screenAnnotator.dispatchKeyEvent(event))
+        screenAnnotator.dispatchKeyEvent(event)
+        return super.dispatchKeyEvent(event);
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
