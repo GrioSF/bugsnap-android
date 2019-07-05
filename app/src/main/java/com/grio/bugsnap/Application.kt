@@ -10,7 +10,10 @@ class Application : Application() {
         if (BuildConfig.DEBUG) {
             BugSnap.init(this,
                 BuildConfig.BUGSNAP_URL,
-                BuildConfig.BUGSNAP_PROJECT_NAME)
+                BuildConfig.BUGSNAP_PROJECT_NAME,
+                BuildConfig.BUGSNAP_PROJECT_KEY,
+                BuildConfig.BUGSNAP_JIRA_USERNAME,
+                BuildConfig.BUGSNAP_JIRA_API_KEY)
         }
     }
 }
