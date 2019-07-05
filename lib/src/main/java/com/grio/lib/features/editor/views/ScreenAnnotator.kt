@@ -11,19 +11,16 @@ import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import androidx.core.view.children
 import com.grio.lib.core.extension.screenshot
 import com.grio.lib.features.editor.BugAnnotation
 import com.grio.lib.features.editor.PenAnnotation
 import com.grio.lib.features.editor.TextAnnotation
-import androidx.core.content.ContextCompat.getSystemService
-
-
+import android.text.SpannableStringBuilder
+import android.view.inputmethod.BaseInputConnection
+import com.grio.lib.features.editor.views.TextToolState.*
 
 
 /**
@@ -39,7 +36,6 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var annotations = arrayListOf<BugAnnotation>()
     lateinit var originalScreenshot: Bitmap
 
-    private var key = ""
     // State
     var paintColor = "#000000"
     var strokeWidth = 10f
@@ -49,9 +45,17 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var yCurrent = 0f
     var currentTool = Tool.NONE
 
+    private val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+    var textInput = SpannableStringBuilder()
+    var textToolState = NONE
+
     lateinit var listener: Listener
 
     init {
+        isFocusableInTouchMode = true;
+        isFocusable = true;
+
         brush.apply {
             style = Paint.Style.STROKE
             isAntiAlias = true
@@ -62,10 +66,49 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
 
         textBrush.apply {
-            style = Paint.Style.STROKE
+            style = Paint.Style.FILL_AND_STROKE
             isAntiAlias = true
             color = Color.RED
         }
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event!!.action == KeyEvent.ACTION_UP && textToolState == TYPING) {
+            if (keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty()) {
+                textInput.delete(textInput.length - 1, textInput.length)
+                (annotations.last() as TextAnnotation).text = textInput.toString()
+                invalidate()
+                return true
+            } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                textToolState = NONE
+                textInput.clear()
+                imm.hideSoftInputFromWindow(windowToken, 0)
+                invalidate()
+                return true
+            } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+                textToolState = NONE
+                textInput.clear()
+                invalidate()
+                return true
+            } else { // text character
+                textInput.append(event.unicodeChar.toChar())
+                (annotations.last() as TextAnnotation).text = textInput.toString()
+                invalidate()
+                return true
+            }
+        }
+        return false
+    }
+
+    // Handle hardware back press
+    override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event?.action == KeyEvent.ACTION_UP && event.keyCode == KeyEvent.KEYCODE_BACK) {
+            textToolState = NONE
+            textInput.clear()
+            invalidate()
+            return super.onKeyPreIme(keyCode, event)
+        }
+        return super.onKeyPreIme(keyCode, event)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -78,10 +121,21 @@ class ScreenAnnotator @JvmOverloads constructor(
                 }
             }
             Tool.TEXT -> {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> return true
-//                    MotionEvent.ACTION_MOVE -> recordPenMovement(event.x, event.y)
-                    MotionEvent.ACTION_UP -> startTextRecording(event.x, event.y)
+                when (textToolState) {
+                    INITIALIZING -> {
+                        if (event?.action == MotionEvent.ACTION_UP) {
+
+                        }
+                    }
+                    TYPING -> {
+                        if (event?.action == MotionEvent.ACTION_UP) {
+
+                        }
+                    }
+                    NONE -> {
+                        textToolState = INITIALIZING
+                        initializeTextAnnotation(event!!.x, event.y)
+                    }
                 }
             }
             Tool.SHAPE -> {
@@ -109,17 +163,9 @@ class ScreenAnnotator @JvmOverloads constructor(
                 }
 
                 is TextAnnotation -> {
-                    annotation.text.measure(width, height)
-                    annotation.text.layout(annotation.x.toInt() - annotation.text.children.first().width/2,
-                        annotation.y.toInt() - annotation.text.children.first().height/2,
-                        annotation.x.toInt() + annotation.text.children.first().width/2,
-                        annotation.y.toInt() + annotation.text.children.first().height/2)
-                    (annotation.text.children.first() as Button).setText(key)
-                    canvas?.save()
-                    canvas?.translate(annotation.x - annotation.text.children.first().width/2,
-                        annotation.y - annotation.text.children.first().height/2)
-                    annotation.text.draw(canvas)
-                    canvas?.restore()
+                    textBrush.color = Color.parseColor(annotation.color)
+                    textBrush.textSize = annotation.size
+                    canvas?.drawText(annotation.text, (annotation.x - textBrush.measureText(annotation.text)/2), (annotation.y - annotation.size/2), textBrush)
                 }
             }
         }
@@ -193,42 +239,27 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
     }
 
-    private fun startTextRecording(x: Float, y: Float) {
+    private fun initializeTextAnnotation(x: Float, y: Float) {
         listener.beginDrawing()
-        val newAnnotation = TextAnnotation(paintColor, strokeWidth, LinearLayout(context), x, y)
-        val editText = Button(context)
-        editText.setText("Ayo for Yayo")
-        editText.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        newAnnotation.text.addView(editText)
+        val newAnnotation = TextAnnotation(paintColor, strokeWidth, "", x, y)
+
         annotations.add(newAnnotation)
-
-        editText.isFocusableInTouchMode = true
-        editText.inputType = InputType.TYPE_CLASS_TEXT
-
-        val im = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-        im!!.showSoftInput(editText, 0)
-
-        editText.requestFocus()
-        currentTool = Tool.NONE
+        // show the keyboard so we can enter text
+        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        textToolState = TYPING
     }
 
-    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-        val keyaction = event?.getAction()
-
-        if (keyaction == KeyEvent.ACTION_DOWN) {
-            val keyunicode = event.getUnicodeChar(event.getMetaState())
-            val character = keyunicode.toChar()
-            key += character
-            println("DEBUG MESSAGE KEY=$character")
-        }
-        // you might add if (delete)
-        // https://stackoverflow.com/questions/7438612/how-to-remove-the-last-character-from-a-string
-        // method to delete last character
-        invalidate()
-        return super.dispatchKeyEvent(event)
+    override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
+        val fic = BaseInputConnection(this, false)
+        outAttrs?.inputType = InputType.TYPE_NULL
+        return fic
     }
 }
 
 enum class Tool {
     PEN, TEXT, SHAPE, NONE
+}
+
+enum class TextToolState {
+    INITIALIZING, TYPING, NONE
 }
