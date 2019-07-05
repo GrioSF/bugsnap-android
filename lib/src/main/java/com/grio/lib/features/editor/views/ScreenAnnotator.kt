@@ -20,7 +20,10 @@ import com.grio.lib.features.editor.PenAnnotation
 import com.grio.lib.features.editor.TextAnnotation
 import android.text.SpannableStringBuilder
 import android.view.inputmethod.BaseInputConnection
+import com.grio.lib.features.editor.ShapeAnnotation
 import com.grio.lib.features.editor.views.TextToolState.*
+import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -139,7 +142,10 @@ class ScreenAnnotator @JvmOverloads constructor(
                 }
             }
             Tool.SHAPE -> {
-
+                when(event?.action) {
+                    MotionEvent.ACTION_DOWN -> startShapeDrawing(event.x, event.y)
+                    MotionEvent.ACTION_MOVE -> recordShapeMovement(event.x, event.y)
+                }
             }
             Tool.NONE -> {
                 // no op
@@ -147,6 +153,17 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
         invalidate()
         return true
+    }
+
+    private fun startShapeDrawing(x: Float, y: Float) {
+        listener.beginDrawing()
+        val newAnnotation = ShapeAnnotation(paintColor, strokeWidth, x, y, x, y)
+        annotations.add(newAnnotation)
+    }
+
+    private fun recordShapeMovement(x: Float, y: Float) {
+        (annotations.last() as ShapeAnnotation).endX = x
+        (annotations.last() as ShapeAnnotation).endY = y
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -175,6 +192,16 @@ class ScreenAnnotator @JvmOverloads constructor(
                         (annotation.y),
                         brush)
                     canvas?.drawText(annotation.text, (annotation.x - textBrush.measureText(annotation.text)/2), (annotation.y - annotation.size/2), textBrush)
+                }
+
+                is ShapeAnnotation -> {
+                    brush.color = Color.parseColor(annotation.color)
+                    brush.strokeWidth = annotation.size
+                    canvas?.drawRect(
+                        min(annotation.startX, annotation.endX),
+                        min(annotation.startY, annotation.endY),
+                        max(annotation.endX, annotation.startX),
+                        max(annotation.endY, annotation.startY), brush)
                 }
             }
         }

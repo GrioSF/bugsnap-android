@@ -78,7 +78,10 @@ class EditorActivity : BaseActivity() {
                     screenAnnotator.currentTool = Tool.TEXT
                     viewModel.toolOptionsShown.value = true
                 }
-                //it.itemId == R.id.insertShape ->
+                it.itemId == R.id.insertShape -> {
+                    screenAnnotator.currentTool = Tool.SHAPE
+                    viewModel.toolOptionsShown.value = true
+                }
                 //it.itemId = R.id.delete ->
                 it.itemId == R.id.undo -> screenAnnotator.undo()
 
