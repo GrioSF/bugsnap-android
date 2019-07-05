@@ -159,12 +159,21 @@ class ScreenAnnotator @JvmOverloads constructor(
                 is PenAnnotation -> {
                     brush.color = Color.parseColor(annotation.color)
                     brush.strokeWidth = annotation.size
+                    brush.style = Paint.Style.STROKE
                     canvas?.drawPath(annotation.drawnPath, brush)
                 }
 
                 is TextAnnotation -> {
-                    textBrush.color = Color.parseColor(annotation.color)
+                    textBrush.color = Color.WHITE
                     textBrush.textSize = annotation.size
+                    brush.color = Color.parseColor(annotation.color)
+                    brush.strokeWidth = 1f
+                    brush.style = Paint.Style.FILL_AND_STROKE
+                    canvas?.drawRect((annotation.x - textBrush.measureText(annotation.text)/2) - annotation.size/2,
+                        (annotation.y - annotation.size/2) - annotation.size,
+                        (annotation.x + textBrush.measureText(annotation.text)/2) + annotation.size/2,
+                        (annotation.y),
+                        brush)
                     canvas?.drawText(annotation.text, (annotation.x - textBrush.measureText(annotation.text)/2), (annotation.y - annotation.size/2), textBrush)
                 }
             }
