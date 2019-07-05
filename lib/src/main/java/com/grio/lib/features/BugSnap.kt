@@ -60,19 +60,6 @@ class BugSnap {
                 override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
                 override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
 
-
-                    //Debug only. Remove.
-//                    var handler = Handler()
-//                    handler.postDelayed({
-//                        val rootView = activity?.window?.decorView as View
-//                        val bitmap = rootView.screenshot()
-//
-//                        val intent = Intent(activity, EditorActivity::class.java)
-//                        DataHolder.data = bitmap
-//                        activity.startActivity(intent)
-//                    }, 1000)
-                    // END Debug
-
                     // Setup listener.
                      sd = ShakeDetector(object :
                          ShakeDetector.Listener {
