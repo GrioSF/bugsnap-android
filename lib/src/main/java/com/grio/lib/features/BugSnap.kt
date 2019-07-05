@@ -65,12 +65,15 @@ class BugSnap {
                          ShakeDetector.Listener {
                          override fun hearShake() {
                              Log.d(TAG, "shaking!")
-                             val rootView = activity?.window?.decorView as View
-                             val bitmap = rootView.screenshot()
 
-                             val intent = Intent(activity, EditorActivity::class.java)
-                             DataHolder.data = bitmap
-                             activity.startActivity(intent)
+                             activity?.window?.decorView?.post {
+                                 val rootView = activity.window?.decorView as View
+                                 val bitmap = rootView.screenshot()
+
+                                 val intent = Intent(activity, EditorActivity::class.java)
+                                 DataHolder.data = bitmap
+                                 activity.startActivity(intent)
+                             }
                          }
                      })
 
