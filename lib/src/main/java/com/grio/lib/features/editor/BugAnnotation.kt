@@ -22,3 +22,12 @@ data class TextAnnotation(
     val x: Float,
     val y: Float
 ) : BugAnnotation
+
+data class ShapeAnnotation(
+    override var color: String,
+    override var size: Float,
+    var startX: Float,
+    var startY: Float,
+    var endX: Float,
+    var endY: Float
+) : BugAnnotation
