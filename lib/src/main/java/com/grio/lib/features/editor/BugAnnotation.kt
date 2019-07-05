@@ -18,7 +18,7 @@ data class PenAnnotation(
 data class TextAnnotation(
     override var color: String,
     override var size: Float,
-    var text: LinearLayout,
+    var text: String,
     val x: Float,
     val y: Float
 ) : BugAnnotation
