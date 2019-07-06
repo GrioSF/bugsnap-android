@@ -8,6 +8,7 @@ interface BugAnnotation {
     var color: String
     var size: Float
     fun wasSelected(x: Float, y: Float): Boolean
+    fun getRect(): RectF
 }
 
 data class PenAnnotation(
@@ -33,7 +34,7 @@ data class PenAnnotation(
         return false
     }
 
-    fun getRect(): RectF {
+    override fun getRect(): RectF {
         return RectF(
             left - size / 2,
             top - size / 2,
@@ -65,7 +66,7 @@ data class TextAnnotation(
         return false
     }
 
-    fun getRect(): RectF {
+    override fun getRect(): RectF {
         val paint = Paint()
         paint.textSize = size
         val textWidth = paint.measureText(text)
@@ -89,5 +90,9 @@ data class ShapeAnnotation(
 ) : BugAnnotation {
     override fun wasSelected(x: Float, y: Float): Boolean {
         return false
+    }
+
+    override fun getRect(): RectF {
+        return RectF()
     }
 }
