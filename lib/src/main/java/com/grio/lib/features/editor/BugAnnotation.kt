@@ -1,5 +1,6 @@
 package com.grio.lib.features.editor
 
+import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 
@@ -34,10 +35,11 @@ data class PenAnnotation(
 
     fun getRect(): RectF {
         return RectF(
-        left - size/2,
-        top - size/2,
-        right + size/2,
-        bottom + size/2)
+            left - size / 2,
+            top - size / 2,
+            right + size / 2,
+            bottom + size / 2
+        )
     }
 }
 
@@ -49,9 +51,32 @@ data class TextAnnotation(
     val y: Float
 ) : BugAnnotation {
     override fun wasSelected(x: Float, y: Float): Boolean {
+        val paint = Paint()
+        paint.textSize = size
+        val textWidth = paint.measureText(text)
+
+        if (x > (this.x - textWidth / 2 - (size / 2)) &&
+            x < (this.x + textWidth / 2 + (size / 2)) &&
+            y > (this.y - (size / 2) - size) &&
+            y < this.y
+        ) {
+            return true
+        }
         return false
     }
 
+    fun getRect(): RectF {
+        val paint = Paint()
+        paint.textSize = size
+        val textWidth = paint.measureText(text)
+
+        return RectF(
+            x - textWidth / 2 - size / 2,
+            y - size / 2 - size,
+            x + textWidth / 2 + size / 2,
+            y
+        )
+    }
 }
 
 data class ShapeAnnotation(
