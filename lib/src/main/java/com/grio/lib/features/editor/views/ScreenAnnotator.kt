@@ -147,8 +147,7 @@ class ScreenAnnotator @JvmOverloads constructor(
                     MotionEvent.ACTION_UP -> {
                         if (!annotationIsSelected) {
                             stopPenRecording()
-                        }
-                        else {
+                        } else {
                             annotations.removeAt(annotations.size - 1)
 
                             selectedAnnotation = null
@@ -164,10 +163,23 @@ class ScreenAnnotator @JvmOverloads constructor(
                 }
             }
             Tool.TEXT -> {
-                if (textToolState == NONE) {
-                    textToolState = INITIALIZING
-                    initializeTextAnnotation(event!!.x, event.y)
+                selectedAnnotation = null
+                annotations.forEach { annotation ->
+                    if (annotation.wasSelected(event!!.x, event.y)) {
+                        selectedAnnotation = annotation
+                    }
                 }
+                if (selectedAnnotation == null) {
+                    annotationIsSelected = false
+
+                    if (textToolState == NONE) {
+                        textToolState = INITIALIZING
+                        initializeTextAnnotation(event!!.x, event.y)
+                    }
+                } else {
+                    annotationIsSelected = true
+                }
+                invalidate()
             }
             Tool.SHAPE -> {
                 when (event?.action) {
@@ -217,19 +229,16 @@ class ScreenAnnotator @JvmOverloads constructor(
                     brush.color = Color.parseColor(annotation.color)
                     brush.strokeWidth = 1f
                     brush.style = Paint.Style.FILL_AND_STROKE
-                    canvas?.drawRect(
-                        (annotation.x - textBrush.measureText(annotation.text) / 2) - annotation.size / 2,
-                        (annotation.y - annotation.size / 2) - annotation.size,
-                        (annotation.x + textBrush.measureText(annotation.text) / 2) + annotation.size / 2,
-                        (annotation.y),
-                        brush
-                    )
+                    canvas?.drawRect(annotation.getRect(), brush)
                     canvas?.drawText(
                         annotation.text,
                         (annotation.x - textBrush.measureText(annotation.text) / 2),
                         (annotation.y - annotation.size / 2),
                         textBrush
                     )
+                    if (annotationIsSelected && annotation == selectedAnnotation) {
+                        canvas?.drawRect(annotation.getRect(), selectionBrush)
+                    }
                 }
 
                 is ShapeAnnotation -> {
