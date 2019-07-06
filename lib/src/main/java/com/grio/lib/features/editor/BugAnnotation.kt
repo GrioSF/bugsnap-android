@@ -1,19 +1,45 @@
 package com.grio.lib.features.editor
 
 import android.graphics.Path
-import android.widget.EditText
-import android.widget.LinearLayout
+import android.graphics.RectF
 
 interface BugAnnotation {
     var color: String
     var size: Float
+    fun wasSelected(x: Float, y: Float): Boolean
 }
 
 data class PenAnnotation(
     override var color: String,
     override var size: Float,
-    var drawnPath: Path
-) : BugAnnotation
+    var drawnPath: Path,
+    var startX: Float,
+    var startY: Float,
+    var endX: Float,
+    var endY: Float,
+    var left: Float,
+    var top: Float,
+    var right: Float,
+    var bottom: Float
+) : BugAnnotation {
+    override fun wasSelected(x: Float, y: Float): Boolean {
+        val touchPath = Path()
+        touchPath.moveTo(x, y)
+        val touchArea = RectF(x - 1, y - 1, x + 1, y + 1)
+        touchPath.addRect(touchArea, Path.Direction.CW)
+        touchPath.op(drawnPath, Path.Op.DIFFERENCE)
+        if (touchPath.isEmpty) return true
+        return false
+    }
+
+    fun getRect(): RectF {
+        return RectF(
+        left - size/2,
+        top - size/2,
+        right + size/2,
+        bottom + size/2)
+    }
+}
 
 data class TextAnnotation(
     override var color: String,
@@ -21,7 +47,12 @@ data class TextAnnotation(
     var text: String,
     val x: Float,
     val y: Float
-) : BugAnnotation
+) : BugAnnotation {
+    override fun wasSelected(x: Float, y: Float): Boolean {
+        return false
+    }
+
+}
 
 data class ShapeAnnotation(
     override var color: String,
@@ -30,4 +61,8 @@ data class ShapeAnnotation(
     var startY: Float,
     var endX: Float,
     var endY: Float
-) : BugAnnotation
+) : BugAnnotation {
+    override fun wasSelected(x: Float, y: Float): Boolean {
+        return false
+    }
+}
