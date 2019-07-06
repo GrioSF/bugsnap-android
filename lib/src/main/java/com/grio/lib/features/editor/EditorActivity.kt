@@ -131,7 +131,11 @@ class EditorActivity : BaseActivity() {
                 Toast.makeText(this@EditorActivity, "Summary must not be empty.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            viewModel.addButtonClicked(summary_input.text.toString(), description_input.text.toString(), DataHolder.toFile(this))
+            viewModel.addButtonClicked(
+                summary_input.text.toString(),
+                description_input.text.toString(),
+                DataHolder.toFile(this)
+            )
         }
 
         // Cancel button listener.

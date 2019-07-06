@@ -33,27 +33,26 @@ class ScreenAnnotator @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    private val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
     // Graphics
     private var brush = Paint()
     private var selectionBrush = Paint()
     private var textBrush = Paint()
-    private var annotations = arrayListOf<BugAnnotation>()
-    lateinit var originalScreenshot: Bitmap
-
-    // State
     var paintColor = "#000000"
     var strokeWidth = 10f
-    var currentTool = Tool.NONE
-    private lateinit var lastClick: KeyEvent
-    private var selectedAnnotation: BugAnnotation? = null
-    var annotationIsSelected = false
 
-    private val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
+    // State
     private var textInput = StringBuilder()
     private var textToolState = NONE
+    private var annotations = arrayListOf<BugAnnotation>()
+    private var selectedAnnotation: BugAnnotation? = null
+    var annotationIsSelected = false
+    var currentTool = Tool.NONE
 
     lateinit var listener: Listener
+    lateinit var originalScreenshot: Bitmap
+    lateinit var lastClick: KeyEvent
 
     init {
         isFocusableInTouchMode = true;
@@ -62,7 +61,6 @@ class ScreenAnnotator @JvmOverloads constructor(
         brush.apply {
             style = Paint.Style.STROKE
             isAntiAlias = true
-            color = Color.RED
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
             strokeWidth = 8f
@@ -84,55 +82,57 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
     }
 
-    fun removeSelectedAnnotation() {
-        annotations.remove(selectedAnnotation)
-        invalidate()
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (!::lastClick.isInitialized || event !== lastClick) {
-            if (textToolState == TYPING) {
-                if (keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty()) {
-                    textInput.delete(textInput.length - 1, textInput.length)
-                    (annotations.last() as TextAnnotation).text = textInput.toString()
-                    invalidate()
-                } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    textToolState = NONE
-                    textInput.clear()
-                    imm.hideSoftInputFromWindow(windowToken, 0)
-                    invalidate()
-                } else if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    textToolState = NONE
-                    textInput.clear()
-                    invalidate()
-                } else {
-                    if (event != null) {
-                        textInput.append(event.unicodeChar.toChar())
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        if (::originalScreenshot.isInitialized) {
+            canvas?.drawBitmap(originalScreenshot, 0f, 0f, brush)
+        }
+        for (annotation in annotations) {
+            when (annotation) {
+                is PenAnnotation -> {
+                    brush.color = Color.parseColor(annotation.color)
+                    brush.strokeWidth = annotation.size
+                    brush.style = Paint.Style.STROKE
+                    canvas?.drawPath(annotation.drawnPath, brush)
+                    if (annotationIsSelected && annotation == selectedAnnotation) {
+                        canvas?.drawRect(annotation.getRect(), selectionBrush)
                     }
-                    (annotations.last() as TextAnnotation).text = textInput.toString()
-                    invalidate()
+                }
+
+                is TextAnnotation -> {
+                    textBrush.color = Color.WHITE
+                    textBrush.textSize = annotation.size
+                    brush.color = Color.parseColor(annotation.color)
+                    brush.strokeWidth = 1f
+                    brush.style = Paint.Style.FILL_AND_STROKE
+                    canvas?.drawRect(annotation.getRect(), brush)
+                    canvas?.drawText(
+                        annotation.text,
+                        annotation.x - textBrush.measureText(annotation.text) / 2,
+                        annotation.y - annotation.size / 2,
+                        textBrush
+                    )
+                    if (annotationIsSelected && annotation == selectedAnnotation) {
+                        canvas?.drawRect(annotation.getRect(), selectionBrush)
+                    }
+                }
+
+                is ShapeAnnotation -> {
+                    brush.color = Color.parseColor(annotation.color)
+                    brush.strokeWidth = annotation.size
+                    brush.style = Paint.Style.STROKE
+                    canvas?.drawRect(
+                        min(annotation.startX, annotation.endX),
+                        min(annotation.startY, annotation.endY),
+                        max(annotation.endX, annotation.startX),
+                        max(annotation.endY, annotation.startY), brush
+                    )
                 }
             }
         }
-        if (event != null) {
-            lastClick = event
-        }
-        return true
-    }
-
-    // Handle hardware back press
-    override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
-        if (event?.action == KeyEvent.ACTION_UP && event.keyCode == KeyEvent.KEYCODE_BACK) {
-            textToolState = NONE
-            textInput.clear()
-            invalidate()
-            return super.onKeyPreIme(keyCode, event)
-        }
-        return super.onKeyPreIme(keyCode, event)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-
         when (currentTool) {
             Tool.PEN -> {
                 when (event?.action) {
@@ -188,100 +188,60 @@ class ScreenAnnotator @JvmOverloads constructor(
                 }
             }
             Tool.NONE -> {
-                // no op
+                // TODO: Used for dragging
             }
         }
         invalidate()
         return true
     }
 
-    private fun startShapeDrawing(x: Float, y: Float) {
-        listener.beginDrawing()
-        val newAnnotation = ShapeAnnotation(paintColor, strokeWidth, x, y, x, y)
-        annotations.add(newAnnotation)
-    }
-
-    private fun recordShapeMovement(x: Float, y: Float) {
-        (annotations.last() as ShapeAnnotation).endX = x
-        (annotations.last() as ShapeAnnotation).endY = y
-    }
-
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        if (::originalScreenshot.isInitialized) {
-            canvas?.drawBitmap(originalScreenshot, 0f, 0f, brush)
-        }
-        for (annotation in annotations) {
-            when (annotation) {
-                is PenAnnotation -> {
-                    brush.color = Color.parseColor(annotation.color)
-                    brush.strokeWidth = annotation.size
-                    brush.style = Paint.Style.STROKE
-                    canvas?.drawPath(annotation.drawnPath, brush)
-                    if (annotationIsSelected && annotation == selectedAnnotation) {
-                        canvas?.drawRect(annotation.getRect(), selectionBrush)
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (!::lastClick.isInitialized || event !== lastClick) {
+            if (textToolState == TYPING) {
+                if (keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty()) {
+                    textInput.delete(textInput.length - 1, textInput.length)
+                    (annotations.last() as TextAnnotation).text = textInput.toString()
+                    invalidate()
+                } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    textToolState = NONE
+                    textInput.clear()
+                    imm.hideSoftInputFromWindow(windowToken, 0)
+                    invalidate()
+                } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    textToolState = NONE
+                    textInput.clear()
+                    invalidate()
+                } else {
+                    if (event != null) {
+                        textInput.append(event.unicodeChar.toChar())
                     }
-                }
-
-                is TextAnnotation -> {
-                    textBrush.color = Color.WHITE
-                    textBrush.textSize = annotation.size
-                    brush.color = Color.parseColor(annotation.color)
-                    brush.strokeWidth = 1f
-                    brush.style = Paint.Style.FILL_AND_STROKE
-                    canvas?.drawRect(annotation.getRect(), brush)
-                    canvas?.drawText(
-                        annotation.text,
-                        (annotation.x - textBrush.measureText(annotation.text) / 2),
-                        (annotation.y - annotation.size / 2),
-                        textBrush
-                    )
-                    if (annotationIsSelected && annotation == selectedAnnotation) {
-                        canvas?.drawRect(annotation.getRect(), selectionBrush)
-                    }
-                }
-
-                is ShapeAnnotation -> {
-                    brush.color = Color.parseColor(annotation.color)
-                    brush.strokeWidth = annotation.size
-                    brush.style = Paint.Style.STROKE
-                    canvas?.drawRect(
-                        min(annotation.startX, annotation.endX),
-                        min(annotation.startY, annotation.endY),
-                        max(annotation.endX, annotation.startX),
-                        max(annotation.endY, annotation.startY), brush
-                    )
+                    (annotations.last() as TextAnnotation).text = textInput.toString()
+                    invalidate()
                 }
             }
         }
-    }
-
-    /**
-     * Retrieve the current view of the annotations made
-     */
-    fun getAnnotatedScreenshot(): Bitmap {
-        return this.screenshot()
-    }
-
-    /**
-     * Listens for Annotation Events
-     */
-    interface Listener {
-        // Fired when user begins to draw on screen
-        fun beginDrawing()
-    }
-
-    /**
-     * Removes the last line drawn
-     */
-    fun undo() {
-        if (annotations.isNotEmpty()) {
-            annotations.remove(annotations.last())
+        if (event != null) {
+            lastClick = event
         }
-        invalidate()
+        return true
     }
 
-    // TODO: UPDATE ALL THE DOCS TO HANDLE MULTIPLE TOOLS
+    // Handle hardware back press
+    override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event?.action == KeyEvent.ACTION_UP && event.keyCode == KeyEvent.KEYCODE_BACK) {
+            textToolState = NONE
+            textInput.clear()
+            invalidate()
+            return super.onKeyPreIme(keyCode, event)
+        }
+        return super.onKeyPreIme(keyCode, event)
+    }
+
+    override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
+        val fic = BaseInputConnection(this, false)
+        outAttrs?.inputType = InputType.TYPE_NULL
+        return fic
+    }
 
     /**
      * Record when user touches the screen
@@ -347,14 +307,49 @@ class ScreenAnnotator @JvmOverloads constructor(
 
         annotations.add(newAnnotation)
         // show the keyboard so we can enter text
-        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY)
         textToolState = TYPING
     }
 
-    override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
-        val fic = BaseInputConnection(this, false)
-        outAttrs?.inputType = InputType.TYPE_NULL
-        return fic
+    private fun startShapeDrawing(x: Float, y: Float) {
+        listener.beginDrawing()
+        val newAnnotation = ShapeAnnotation(paintColor, strokeWidth, x, y, x, y)
+        annotations.add(newAnnotation)
+    }
+
+    private fun recordShapeMovement(x: Float, y: Float) {
+        (annotations.last() as ShapeAnnotation).endX = x
+        (annotations.last() as ShapeAnnotation).endY = y
+    }
+
+    fun removeSelectedAnnotation() {
+        annotations.remove(selectedAnnotation)
+        invalidate()
+    }
+
+    /**
+     * Removes the last line drawn
+     */
+    fun undo() {
+        if (annotations.isNotEmpty()) {
+            annotations.remove(annotations.last())
+        }
+        invalidate()
+    }
+
+    /**
+     * Retrieve the current view of the annotations made
+     */
+    fun getAnnotatedScreenshot(): Bitmap {
+        return this.screenshot()
+    }
+
+    /**
+     * Listens for Annotation Events
+     */
+    interface Listener {
+        // Fired when user begins to draw on screen
+        fun beginDrawing()
     }
 }
 
