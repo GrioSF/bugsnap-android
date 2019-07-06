@@ -82,7 +82,10 @@ class EditorActivity : BaseActivity() {
                     screenAnnotator.currentTool = Tool.SHAPE
                     viewModel.toolOptionsShown.value = true
                 }
-                //it.itemId = R.id.delete ->
+                it.itemId == R.id.delete -> {
+                    if (screenAnnotator.annotationIsSelected)
+                        screenAnnotator.removeSelectedAnnotation()
+                }
                 it.itemId == R.id.undo -> screenAnnotator.undo()
 
             }
