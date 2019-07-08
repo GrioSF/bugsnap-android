@@ -191,22 +191,25 @@ class ScreenAnnotator @JvmOverloads constructor(
 
     // Check for key events when typing into text box
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (!::lastClick.isInitialized || event !== lastClick) {
-            if (textToolState == TYPING) {
-                if (keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty()) {
+        if ((!::lastClick.isInitialized || event !== lastClick) && textToolState == TYPING) {
+            when {
+                keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty() -> {
                     textInput.delete(textInput.length - 1, textInput.length)
                     (annotations.last() as TextAnnotation).text = textInput.toString()
                     invalidate()
-                } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                }
+                keyCode == KeyEvent.KEYCODE_ENTER -> {
                     textToolState = NONE
                     textInput.clear()
                     imm.hideSoftInputFromWindow(windowToken, 0)
                     invalidate()
-                } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+                }
+                keyCode == KeyEvent.KEYCODE_BACK -> {
                     textToolState = NONE
                     textInput.clear()
                     invalidate()
-                } else {
+                }
+                else -> {
                     if (event != null) {
                         textInput.append(event.unicodeChar.toChar())
                     }
