@@ -3,6 +3,8 @@ package com.grio.lib.features.editor
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import kotlin.math.max
+import kotlin.math.min
 
 interface BugAnnotation {
     var color: String
@@ -24,6 +26,9 @@ data class PenAnnotation(
     var right: Float,
     var bottom: Float
 ) : BugAnnotation {
+    constructor(color: String, size: Float, drawnPath: Path, x: Float, y: Float) :
+            this(color, size, drawnPath, x, y, x, y, x, y, x, y)
+
     override fun wasSelected(x: Float, y: Float): Boolean {
         val touchPath = Path()
         touchPath.moveTo(x, y)
@@ -41,6 +46,15 @@ data class PenAnnotation(
             right + size / 2,
             bottom + size / 2
         )
+    }
+
+    fun updateBounds(x: Float, y: Float) {
+        endX = x
+        endY = y
+        left = min(x, left)
+        top = min(y, top)
+        right = max(x, right)
+        bottom = max(y, bottom)
     }
 }
 
@@ -89,10 +103,21 @@ data class ShapeAnnotation(
     var endY: Float
 ) : BugAnnotation {
     override fun wasSelected(x: Float, y: Float): Boolean {
-        return false
+        return when {
+            // check left
+            x > startX - size && x < startX + size && y > startY - size && y < endY + size -> true
+            // check right
+            x > endX - size && x < endX + size && y > startY - size && y < endY + size -> true
+            // check top
+            y > startY - size && y < startY + size && x > startX - size && x < endX + size -> true
+            // check bottom
+            y > endY - size && y < endY + size && x > startX - size && x < endX + size -> true
+            // default
+            else -> false
+        }
     }
 
     override fun getRect(): RectF {
-        return RectF()
+        return RectF(startX - size, startY - size, endX + size, endY + size)
     }
 }
