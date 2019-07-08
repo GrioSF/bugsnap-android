@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.text.InputType
 import android.util.AttributeSet
 import android.view.KeyEvent
@@ -278,16 +277,6 @@ class ScreenAnnotator @JvmOverloads constructor(
     private fun stopPenRecording() {
         val annotation = (annotations.last() as PenAnnotation)
         (annotations.last() as PenAnnotation).drawnPath.lineTo(annotation.endX, annotation.endY)
-        // TODO: Re-implement Pen#wasSelected() to handle dots better before enabling
-        // If user taps screen, create a dot
-//        if (annotation.startX == annotation.endX && annotation.startY == annotation.endY) {
-//            (annotations.last() as PenAnnotation).drawnPath.addCircle(
-//                annotation.endX,
-//                annotation.endY,
-//                4f,
-//                Path.Direction.CW
-//            )
-//        }
     }
 
     /**
