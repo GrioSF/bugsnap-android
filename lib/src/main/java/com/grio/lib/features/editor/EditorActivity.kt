@@ -198,8 +198,7 @@ class EditorActivity : BaseActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-        screenAnnotator.dispatchKeyEvent(event)
-        return super.dispatchKeyEvent(event);
+        return (screenAnnotator.dispatchKeyEvent(event))
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
