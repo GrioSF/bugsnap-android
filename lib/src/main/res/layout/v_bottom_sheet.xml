@@ -70,10 +70,15 @@
         android:id="@+id/screenshot_attached_label"
         android:text="Screenshot attached"
         android:layout_width="wrap_content"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/description"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/cancel_btn"/>
+        app:layout_constraintBottom_toTopOf="@id/cancel_btn"
+        android:drawableEnd="@drawable/ic_check_green"
+        android:drawablePadding="8dp"
+        />
 
     <Button
         android:id="@+id/cancel_btn"
