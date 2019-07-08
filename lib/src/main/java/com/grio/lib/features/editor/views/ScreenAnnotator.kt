@@ -247,7 +247,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      */
     private fun startPenDrawing(x: Float, y: Float) {
         listener.beginDrawing()
-        val newAnnotation = PenAnnotation(paintColor, strokeWidth, Path(), x, y)
+        val newAnnotation = PenAnnotation(paintColor, strokeWidth, x, y)
         newAnnotation.drawnPath.moveTo(x, y)
         annotations.add(newAnnotation)
     }
@@ -294,7 +294,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun initializeTextAnnotation(x: Float, y: Float) {
-        val newAnnotation = TextAnnotation(paintColor, strokeWidth, "", x, y)
+        val newAnnotation = TextAnnotation(paintColor, strokeWidth, x, y)
         listener.beginDrawing()
         annotations.add(newAnnotation)
         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY)

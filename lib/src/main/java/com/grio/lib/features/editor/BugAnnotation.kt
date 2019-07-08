@@ -9,7 +9,9 @@ import kotlin.math.min
 interface BugAnnotation {
     var color: String
     var size: Float
+    // Returns whether or not the annotation was selected
     fun wasSelected(x: Float, y: Float): Boolean
+    // Returns the rectangle bounding the annotation
     fun getRect(): RectF
 }
 
@@ -26,13 +28,14 @@ data class PenAnnotation(
     var right: Float,
     var bottom: Float
 ) : BugAnnotation {
-    constructor(color: String, size: Float, drawnPath: Path, x: Float, y: Float) :
-            this(color, size, drawnPath, x, y, x, y, x, y, x, y)
+
+    constructor(color: String, size: Float, x: Float, y: Float) :
+            this(color, size, Path(), x, y, x, y, x, y, x, y)
 
     override fun wasSelected(x: Float, y: Float): Boolean {
+        val touchArea = RectF(x - 1, y - 1, x + 1, y + 1)
         val touchPath = Path()
         touchPath.moveTo(x, y)
-        val touchArea = RectF(x - 1, y - 1, x + 1, y + 1)
         touchPath.addRect(touchArea, Path.Direction.CW)
         touchPath.op(drawnPath, Path.Op.DIFFERENCE)
         if (touchPath.isEmpty) return true
@@ -65,6 +68,10 @@ data class TextAnnotation(
     val x: Float,
     val y: Float
 ) : BugAnnotation {
+
+    constructor(color: String, size: Float, x: Float, y: Float) :
+            this(color, size, "", x, y)
+
     override fun wasSelected(x: Float, y: Float): Boolean {
         val paint = Paint()
         paint.textSize = size
