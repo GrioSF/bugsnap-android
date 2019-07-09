@@ -1,6 +1,7 @@
 package com.grio.lib.features.editor
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintSet
@@ -14,6 +15,7 @@ import com.grio.lib.core.extension.observe
 import com.grio.lib.core.extension.viewModels
 import com.grio.lib.core.platform.BaseActivity
 import com.grio.lib.features.editor.views.ScreenAnnotator
+import com.grio.lib.features.editor.views.Tool
 import com.grio.lib.features.editor.views.ToolOptions
 
 import kotlinx.android.synthetic.main.a_annotation.*
@@ -68,10 +70,22 @@ class EditorActivity : BaseActivity() {
         // BottomAppBar menu item click listener
         toolSelector.setOnMenuItemClickListener {
             when {
-                it.itemId == R.id.draw -> viewModel.toolOptionsShown.value = true
-                //it.itemId == R.id.insertText ->
-                //it.itemId == R.id.insertShape ->
-                //it.itemId = R.id.delete ->
+                it.itemId == R.id.draw -> {
+                    screenAnnotator.currentTool = Tool.PEN
+                    viewModel.toolOptionsShown.value = true
+                }
+                it.itemId == R.id.insertText -> {
+                    screenAnnotator.currentTool = Tool.TEXT
+                    viewModel.toolOptionsShown.value = true
+                }
+                it.itemId == R.id.insertShape -> {
+                    screenAnnotator.currentTool = Tool.SHAPE
+                    viewModel.toolOptionsShown.value = true
+                }
+                it.itemId == R.id.delete -> {
+                    if (screenAnnotator.attemptToSelectAnnotation)
+                        screenAnnotator.removeSelectedAnnotation()
+                }
                 it.itemId == R.id.undo -> screenAnnotator.undo()
 
             }
@@ -117,7 +131,11 @@ class EditorActivity : BaseActivity() {
                 Toast.makeText(this@EditorActivity, "Summary must not be empty.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            viewModel.addButtonClicked(summary_input.text.toString(), description_input.text.toString(), DataHolder.toFile(this))
+            viewModel.addButtonClicked(
+                summary_input.text.toString(),
+                description_input.text.toString(),
+                DataHolder.toFile(this)
+            )
         }
 
         // Cancel button listener.
@@ -177,6 +195,10 @@ class EditorActivity : BaseActivity() {
         setSupportActionBar(topToolbar)
         supportActionBar?.title = getString(R.string.report_a_bug)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+        return (screenAnnotator.dispatchKeyEvent(event))
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
