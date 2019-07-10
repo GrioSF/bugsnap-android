@@ -26,16 +26,7 @@ android {
 
 }
 
-def getLocalProperty(String propertyName) {
-    def propsFile = rootProject.file('local.properties')
-    if (propsFile.exists()) {
-        def props = new Properties()
-        props.load(new FileInputStream(propsFile))
-        return props[propertyName]
-    } else {
-        return ""
-    }
-}
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
