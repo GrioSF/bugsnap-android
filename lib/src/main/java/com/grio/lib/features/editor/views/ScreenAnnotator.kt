@@ -14,15 +14,10 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputMethodManager
 import com.grio.lib.core.extension.screenshot
-import com.grio.lib.features.editor.BugAnnotation
-import com.grio.lib.features.editor.PenAnnotation
-import com.grio.lib.features.editor.TextAnnotation
 import android.view.inputmethod.BaseInputConnection
-import com.grio.lib.features.editor.ShapeAnnotation
+import com.grio.lib.features.editor.*
 import com.grio.lib.features.editor.views.TextToolState.*
 import java.lang.StringBuilder
-import kotlin.math.max
-import kotlin.math.min
 
 
 /**
@@ -47,6 +42,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var textToolState = NONE
     private var annotations = arrayListOf<BugAnnotation>()
     private var selectedAnnotation: BugAnnotation? = null
+    var selectedShapeType = Shape.RECTANGLE
     var attemptToSelectAnnotation = false
     var currentTool = Tool.NONE
 
@@ -116,12 +112,7 @@ class ScreenAnnotator @JvmOverloads constructor(
                     )
                 }
                 is ShapeAnnotation ->
-                    canvas?.drawRect(
-                        min(annotation.startX, annotation.endX),
-                        min(annotation.startY, annotation.endY),
-                        max(annotation.endX, annotation.startX),
-                        max(annotation.endY, annotation.startY), brush
-                    )
+                    annotation.drawShape(canvas, brush)
             }
             // If annotation was selected, draw rectangle around the annotation
             if (attemptToSelectAnnotation && annotation == selectedAnnotation) {
@@ -300,7 +291,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun startShapeDrawing(x: Float, y: Float) {
-        val newAnnotation = ShapeAnnotation(paintColor, strokeWidth, x, y, x, y)
+        val newAnnotation = ShapeAnnotation.createShape(paintColor, strokeWidth, x, y, selectedShapeType)
         listener.beginDrawing()
         annotations.add(newAnnotation)
     }
@@ -312,8 +303,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param y the y coordinate of the touch
      */
     private fun recordShapeMovement(x: Float, y: Float) {
-        (annotations.last() as ShapeAnnotation).endX = x
-        (annotations.last() as ShapeAnnotation).endY = y
+        (annotations.last() as ShapeAnnotation).updateShape(x, y)
     }
 
     /**
@@ -372,6 +362,10 @@ class ScreenAnnotator @JvmOverloads constructor(
 
 enum class Tool {
     PEN, TEXT, SHAPE, NONE
+}
+
+enum class Shape {
+    RECTANGLE, CIRCLE, ARROW
 }
 
 enum class TextToolState {

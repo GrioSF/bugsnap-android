@@ -2,9 +2,12 @@ package com.grio.lib.features.editor.views
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.SeekBar
 
@@ -23,19 +26,42 @@ class ToolOptions @JvmOverloads constructor(
     private var arrowDimen = ARROW_DIMENSION * density
     private val colorPicker = ColorPicker(context)
     private val slider = SeekBar(context)
+    private val shapeButtonHolder = LinearLayout(context)
+    private val rectangleButton = Button(context)
+    private val circleButton = Button(context)
+    private val arrowButton = Button (context)
     lateinit var listener: Listener
+    private var toolOptionsDrawerType = ToolDrawerType.SLIDER
 
     init {
         addView(colorPicker)
         addView(slider)
+        addView(shapeButtonHolder)
+        shapeButtonHolder.addView(rectangleButton)
+        shapeButtonHolder.addView(circleButton)
+        shapeButtonHolder.addView(arrowButton)
+        shapeButtonHolder.orientation = HORIZONTAL
+
+        rectangleButton.text = "Rectangle"
+        circleButton.text = "Circle"
+        arrowButton.text = "Arrow"
+        rectangleButton.setBackgroundColor(Color.parseColor("#595959"))
+        arrowButton.setBackgroundColor(Color.parseColor("#595959"))
+        circleButton.setBackgroundColor(Color.parseColor("#595959"))
+        rectangleButton.setTextColor(Color.WHITE)
+        circleButton.setTextColor(Color.WHITE)
+        arrowButton.setTextColor(Color.WHITE)
+
         colorPicker.visibility = GONE
         slider.visibility = GONE
+        shapeButtonHolder.visibility = GONE
 
         colorPicker.listener = object : ColorPicker.Listener {
             override fun colorPicked(color: String) {
                 listener.colorSelected(color)
             }
         }
+
         slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 listener.strokeWidthSet(progress.toFloat())
@@ -49,6 +75,21 @@ class ToolOptions @JvmOverloads constructor(
                 // do nothing
             }
         })
+
+        rectangleButton.setOnClickListener { listener.shapeSelected(Shape.RECTANGLE) }
+        circleButton.setOnClickListener { listener.shapeSelected(Shape.CIRCLE) }
+        arrowButton.setOnClickListener { listener.shapeSelected(Shape.ARROW) }
+    }
+
+    fun setDrawerType(type: ToolDrawerType) {
+        toolOptionsDrawerType = type
+        if (toolOptionsDrawerType == ToolDrawerType.SLIDER) {
+            slider.visibility = View.VISIBLE
+            shapeButtonHolder.visibility = View.GONE
+        } else if (toolOptionsDrawerType == ToolDrawerType.SHAPES) {
+            slider.visibility = View.GONE
+            shapeButtonHolder.visibility = View.VISIBLE
+        }
     }
 
     /**
@@ -63,6 +104,9 @@ class ToolOptions @JvmOverloads constructor(
 
         // Called when stroke width is set
         fun strokeWidthSet(strokeWidth: Float)
+
+        // Called when shape is selected
+        fun shapeSelected(shape: Shape)
     }
 
     /**
@@ -86,8 +130,15 @@ class ToolOptions @JvmOverloads constructor(
             params.marginEnd = arrowDimen * 4
             params.gravity = Gravity.CENTER
 
+            val buttomParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
+            params.gravity = Gravity.CENTER
+
             slider.layoutParams = params
             colorPicker.layoutParams = params
+            arrowButton.layoutParams = buttomParams
+            rectangleButton.layoutParams = buttomParams
+            circleButton.layoutParams = buttomParams
+            shapeButtonHolder.layoutParams = params
         }
     }
 
@@ -111,4 +162,8 @@ class ToolOptions @JvmOverloads constructor(
         }
         return super.onTouchEvent(event)
     }
+}
+
+enum class ToolDrawerType {
+    SLIDER, SHAPES
 }

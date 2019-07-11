@@ -1,16 +1,20 @@
 package com.grio.lib.features.editor
 
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.RectF
-import kotlin.math.max
+import android.graphics.Path
 import kotlin.math.min
+import kotlin.math.max
+
+const val CLICKABLE_AREA_ALLOWANCE = 40f
 
 interface BugAnnotation {
     var color: String
     var size: Float
+
     // Returns whether or not the annotation was selected
     fun wasSelected(x: Float, y: Float): Boolean
+
     // Returns the rectangle bounding the annotation
     fun getRect(): RectF
 }
@@ -98,33 +102,5 @@ data class TextAnnotation(
             x + textWidth / 2 + size / 2,
             y
         )
-    }
-}
-
-data class ShapeAnnotation(
-    override var color: String,
-    override var size: Float,
-    var startX: Float,
-    var startY: Float,
-    var endX: Float,
-    var endY: Float
-) : BugAnnotation {
-    override fun wasSelected(x: Float, y: Float): Boolean {
-        return when {
-            // check left
-            x > startX - size && x < startX + size && y > startY - size && y < endY + size -> true
-            // check right
-            x > endX - size && x < endX + size && y > startY - size && y < endY + size -> true
-            // check top
-            y > startY - size && y < startY + size && x > startX - size && x < endX + size -> true
-            // check bottom
-            y > endY - size && y < endY + size && x > startX - size && x < endX + size -> true
-            // default
-            else -> false
-        }
-    }
-
-    override fun getRect(): RectF {
-        return RectF(startX - size, startY - size, endX + size, endY + size)
     }
 }
