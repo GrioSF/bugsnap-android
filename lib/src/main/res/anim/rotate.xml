@@ -4,5 +4,5 @@
         android:toDegrees="90"
         android:pivotX="50%"
         android:pivotY="50%"
-        android:drawable="@drawable/ic_keyboard_arrow_left_white_24dp">
+        android:drawable="@drawable/caret_icon">
 </rotate>

@@ -150,6 +150,11 @@ class ScreenAnnotator @JvmOverloads constructor(
         return fic
     }
 
+    /**
+     * Handles touch actions associated with pen tool
+     *
+     * @param event the touch event information to be processed
+     */
     private fun handlePenToolTouchEvent(event: MotionEvent?) {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -170,6 +175,11 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Handles touch actions associated with text tool
+     *
+     * @param event the touch event information to be processed
+     */
     private fun handleTextToolTouchEvent(event: MotionEvent?) {
         if (event?.action == MotionEvent.ACTION_UP) {
             if (!annotationWasSelected(event.x, event.y) && textToolState == NONE) {
@@ -182,6 +192,11 @@ class ScreenAnnotator @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Handles touch actions associated with shape tool
+     *
+     * @param event the touch event information to be processed
+     */
     private fun handleShapeToolTouchEvent(event: MotionEvent?) {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
