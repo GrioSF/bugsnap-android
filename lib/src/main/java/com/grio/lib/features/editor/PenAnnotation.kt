@@ -38,6 +38,7 @@ data class PenAnnotation(
     }
 
     override fun wasSelected(x: Float, y: Float): Boolean {
+        // Test if touched point as a path is in the drawn path
         val touchArea = RectF(x - 1, y - 1, x + 1, y + 1)
         val touchPath = Path()
         touchPath.moveTo(x, y)
