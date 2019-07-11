@@ -1,28 +1,38 @@
 package com.grio.lib.features.editor
 
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PointF
-import android.graphics.RectF
+import android.graphics.*
+import com.grio.lib.features.editor.ShapeAnnotation.Companion.CLICKABLE_AREA_ALLOWANCE
 import kotlin.math.max
 import kotlin.math.min
 
 data class ArrowAnnotation(
     override var color: String,
     override var size: Float,
+    override var defaultBrush: Paint,
     var start: PointF,
     var end: PointF,
     var arrowLeftEnd: PointF,
     var arrowRightEnd: PointF
 ) : ShapeAnnotation {
 
-    constructor(color: String, x: Float, y: Float) :
-            this(color, 15f, PointF(x, y), PointF(x, y), PointF(x, y), PointF(x, y))
+    init {
+        defaultBrush.apply {
+            style = Paint.Style.STROKE
+            isAntiAlias = true
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = size
+            color = Color.parseColor(this@ArrowAnnotation.color)
+        }
+    }
 
-    override fun drawShape(canvas: Canvas?, brush: Paint) {
-        canvas?.drawLine(start.x, start.y, end.x, end.y, brush)
-        canvas?.drawLine(end.x, end.y, arrowLeftEnd.x, arrowLeftEnd.y, brush)
-        canvas?.drawLine(end.x, end.y, arrowRightEnd.x, arrowRightEnd.y, brush)
+    constructor(color: String, x: Float, y: Float) :
+            this(color, 15f, Paint(), PointF(x, y), PointF(x, y), PointF(x, y), PointF(x, y))
+
+    override fun drawToCanvas(canvas: Canvas?) {
+        canvas?.drawLine(start.x, start.y, end.x, end.y, defaultBrush)
+        canvas?.drawLine(end.x, end.y, arrowLeftEnd.x, arrowLeftEnd.y, defaultBrush)
+        canvas?.drawLine(end.x, end.y, arrowRightEnd.x, arrowRightEnd.y, defaultBrush)
     }
 
     override fun updateShape(x: Float, y: Float) {

@@ -30,18 +30,15 @@ class ScreenAnnotator @JvmOverloads constructor(
     private val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
     // Graphics
-    private var brush = Paint()
     private var selectionBrush = Paint()
-    private var textBrush = Paint()
-    private var textBackgroundBrush = Paint()
     var paintColor = "#000000"
     var strokeWidth = 10f
 
     // State
     private var textInput = StringBuilder()
     private var textToolState = NONE
-    private var annotations = arrayListOf<BugAnnotation>()
-    private var selectedAnnotation: BugAnnotation? = null
+    private var annotations = arrayListOf<BaseAnnotation>()
+    private var selectedAnnotation: BaseAnnotation? = null
     var selectedShapeType = Shape.RECTANGLE
     var attemptToSelectAnnotation = false
     var currentTool = Tool.NONE
@@ -53,28 +50,6 @@ class ScreenAnnotator @JvmOverloads constructor(
     init {
         isFocusableInTouchMode = true
         isFocusable = true
-
-        brush.apply {
-            style = Paint.Style.STROKE
-            isAntiAlias = true
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = 8f
-        }
-
-        textBrush.apply {
-            style = Paint.Style.FILL_AND_STROKE
-            isAntiAlias = true
-            color = Color.WHITE
-        }
-
-        textBackgroundBrush.apply {
-            style = Paint.Style.FILL_AND_STROKE
-            isAntiAlias = true
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = 4f
-        }
 
         selectionBrush.apply {
             style = Paint.Style.STROKE
@@ -90,30 +65,12 @@ class ScreenAnnotator @JvmOverloads constructor(
         super.onDraw(canvas)
         // Draw screenshot to canvas
         if (::originalScreenshot.isInitialized) {
-            canvas?.drawBitmap(originalScreenshot, 0f, 0f, brush)
+            canvas?.drawBitmap(originalScreenshot, 0f, 0f, selectionBrush)
         }
-        // Iterate through all annotations and draw them to the canvas
         for (annotation in annotations) {
-            brush.color = Color.parseColor(annotation.color)
-            brush.strokeWidth = annotation.size
+            // Draw annotation onto screen
+            annotation.drawToCanvas(canvas)
 
-            when (annotation) {
-                is PenAnnotation -> {
-                    canvas?.drawPath(annotation.drawnPath, brush)
-                }
-                is TextAnnotation -> {
-                    textBrush.textSize = annotation.size
-                    canvas?.drawRect(annotation.getRect(), textBackgroundBrush)
-                    canvas?.drawText(
-                        annotation.text,
-                        annotation.x - textBrush.measureText(annotation.text) / 2,
-                        annotation.y - annotation.size / 2,
-                        textBrush
-                    )
-                }
-                is ShapeAnnotation ->
-                    annotation.drawShape(canvas, brush)
-            }
             // If annotation was selected, draw rectangle around the annotation
             if (attemptToSelectAnnotation && annotation == selectedAnnotation) {
                 canvas?.drawRect(annotation.getRect(), selectionBrush)
@@ -124,55 +81,16 @@ class ScreenAnnotator @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (currentTool) {
             Tool.PEN -> {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        attemptToSelectAnnotation = true
-                        startPenDrawing(event.x, event.y)
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        attemptToSelectAnnotation = false
-                        recordPenMovement(event.x, event.y)
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
-                            annotations.removeAt(annotations.size - 1)
-                        } else {
-                            stopPenRecording()
-                        }
-                    }
-                }
+                handlePenToolTouchEvent(event)
             }
             Tool.TEXT -> {
-                if (event?.action == MotionEvent.ACTION_UP) {
-                    if (!annotationWasSelected(event.x, event.y) && textToolState == NONE) {
-                        textToolState = INITIALIZING
-                        initializeTextAnnotation(event.x, event.y)
-                    } else {
-                        attemptToSelectAnnotation = true
-                    }
-                    invalidate()
-                }
+                handleTextToolTouchEvent(event)
             }
             Tool.SHAPE -> {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        attemptToSelectAnnotation = true
-                        startShapeDrawing(event.x, event.y)
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        attemptToSelectAnnotation = false
-                        recordShapeMovement(event.x, event.y)
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        if (attemptToSelectAnnotation) {
-                            annotations.removeAt(annotations.size - 1)
-                            annotationWasSelected(event.x, event.y)
-                        }
-                    }
-                }
+                handleShapeToolTouchEvent(event)
             }
             Tool.NONE -> {
-                // TODO: Used for dragging
+                // TODO: To be used for dragging
             }
         }
         invalidate()
@@ -230,6 +148,57 @@ class ScreenAnnotator @JvmOverloads constructor(
         val fic = BaseInputConnection(this, false)
         outAttrs?.inputType = InputType.TYPE_NULL
         return fic
+    }
+
+    private fun handlePenToolTouchEvent(event: MotionEvent?) {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                attemptToSelectAnnotation = true
+                startPenDrawing(event.x, event.y)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                attemptToSelectAnnotation = false
+                recordPenMovement(event.x, event.y)
+            }
+            MotionEvent.ACTION_UP -> {
+                if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
+                    annotations.removeAt(annotations.size - 1)
+                } else {
+                    stopPenRecording()
+                }
+            }
+        }
+    }
+
+    private fun handleTextToolTouchEvent(event: MotionEvent?) {
+        if (event?.action == MotionEvent.ACTION_UP) {
+            if (!annotationWasSelected(event.x, event.y) && textToolState == NONE) {
+                textToolState = INITIALIZING
+                initializeTextAnnotation(event.x, event.y)
+            } else {
+                attemptToSelectAnnotation = true
+            }
+            invalidate()
+        }
+    }
+
+    private fun handleShapeToolTouchEvent(event: MotionEvent?) {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                attemptToSelectAnnotation = true
+                startShapeDrawing(event.x, event.y)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                attemptToSelectAnnotation = false
+                recordShapeMovement(event.x, event.y)
+            }
+            MotionEvent.ACTION_UP -> {
+                if (attemptToSelectAnnotation) {
+                    annotations.removeAt(annotations.size - 1)
+                    annotationWasSelected(event.x, event.y)
+                }
+            }
+        }
     }
 
     /**

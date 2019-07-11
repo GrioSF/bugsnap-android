@@ -1,9 +1,7 @@
 package com.grio.lib.features.editor
 
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PointF
-import android.graphics.RectF
+import android.graphics.*
+import com.grio.lib.features.editor.ShapeAnnotation.Companion.CLICKABLE_AREA_ALLOWANCE
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.atan2
@@ -13,14 +11,26 @@ import kotlin.math.sin
 data class CircleAnnotation(
     override var color: String,
     override var size: Float,
+    override var defaultBrush: Paint,
     var center: PointF,
     var radius: Float
 ) : ShapeAnnotation {
 
-    constructor(color: String, x: Float, y: Float): this(color, 15f, PointF(x, y), 0f)
+    init {
+        defaultBrush.apply {
+            style = Paint.Style.STROKE
+            isAntiAlias = true
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = size
+            color = Color.parseColor(this@CircleAnnotation.color)
+        }
+    }
 
-    override fun drawShape(canvas: Canvas?, brush: Paint) {
-        canvas?.drawCircle(center.x, center.y, radius, brush)
+    constructor(color: String, x: Float, y: Float): this(color, 15f, Paint(), PointF(x, y), 0f)
+
+    override fun drawToCanvas(canvas: Canvas?) {
+        canvas?.drawCircle(center.x, center.y, radius, defaultBrush)
     }
 
     override fun updateShape(x: Float, y: Float) {
