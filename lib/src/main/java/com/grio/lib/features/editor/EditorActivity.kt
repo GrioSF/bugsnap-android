@@ -14,9 +14,6 @@ import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.observe
 import com.grio.lib.core.extension.viewModels
 import com.grio.lib.core.platform.BaseActivity
-import com.grio.lib.features.editor.views.ScreenAnnotator
-import com.grio.lib.features.editor.views.Tool
-import com.grio.lib.features.editor.views.ToolOptions
 
 import kotlinx.android.synthetic.main.a_annotation.*
 import javax.inject.Inject
@@ -26,6 +23,7 @@ import kotlinx.android.synthetic.main.v_bottom_sheet.*
 
 import android.view.View
 import android.widget.Toast
+import com.grio.lib.features.editor.views.*
 
 const val TOOL_OPTIONS_DRAWER_MARGIN = 16
 const val TOOL_OPTIONS_DRAWER_ANIMATION_DURATION = 500L
@@ -73,14 +71,17 @@ class EditorActivity : BaseActivity() {
                 it.itemId == R.id.draw -> {
                     screenAnnotator.currentTool = Tool.PEN
                     viewModel.toolOptionsShown.value = true
+                    toolOptions.setDrawerType(ToolDrawerType.SLIDER)
                 }
                 it.itemId == R.id.insertText -> {
                     screenAnnotator.currentTool = Tool.TEXT
                     viewModel.toolOptionsShown.value = true
+                    toolOptions.setDrawerType(ToolDrawerType.SLIDER)
                 }
                 it.itemId == R.id.insertShape -> {
                     screenAnnotator.currentTool = Tool.SHAPE
                     viewModel.toolOptionsShown.value = true
+                    toolOptions.setDrawerType(ToolDrawerType.SHAPES)
                 }
                 it.itemId == R.id.delete -> {
                     if (screenAnnotator.attemptToSelectAnnotation)
@@ -94,7 +95,6 @@ class EditorActivity : BaseActivity() {
 
         // Tool options drawer state listener
         toolOptions.listener = object : ToolOptions.Listener {
-
             override fun strokeWidthSet(strokeWidth: Float) {
                 screenAnnotator.strokeWidth = strokeWidth
             }
@@ -106,6 +106,11 @@ class EditorActivity : BaseActivity() {
             override fun toggleDrawer(margin: Int) {
                 viewModel.toggleToolOptionsDrawer()
             }
+
+            override fun shapeSelected(shape: Shape) {
+                screenAnnotator.selectedShapeType = shape
+            }
+
         }
 
         // Initialize bottom sheet behavior.
