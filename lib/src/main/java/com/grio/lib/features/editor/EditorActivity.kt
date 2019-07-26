@@ -160,7 +160,8 @@ class EditorActivity : BaseActivity() {
             viewModel.addButtonClicked(
                 summary_input.text.toString(),
                 description_input.text.toString(),
-                DataHolder.toFile(this)
+                DataHolder.toFile(this),
+                log
             )
         }
 

@@ -29,7 +29,7 @@ class EditorViewModel
      * Invoked when the "Add Ticket"
      * button is clicked.
      */
-    fun addButtonClicked(summary: String, description: String, file: File) {
+    fun addButtonClicked(summary: String, description: String, file: File, logString: String = "") {
         // Start loading
         isLoading.value = true
 
@@ -42,16 +42,31 @@ class EditorViewModel
 
             Log.i("BugSnap", "Successfully create issue.")
 
-            // If successful, add attachment.
+            // If successful, add screenshot attachment.
             val filePart = MultipartBody.Part.createFormData("file", file.name, RequestBody.create(MediaType.parse("image/*"), file))
 
             addAttachment(AddAttachment.Params(it.id, filePart)) { it.either({
                 isLoading.value = false
-                Log.e("BugSnap", "Failed to upload attachment: $it")
+                Log.e("BugSnap", "Failed to upload screenshot: $it")
             }, {
                 isLoading.value = false
-                Log.i("BugSnap", "Attachment uploaded successfully! $it")
+                Log.i("BugSnap", "Screenshot uploaded successfully! $it")
             })}
+
+            // If there's a log attached, upload that as well.
+            if (logString.isNotEmpty()) {
+                val logPart = MultipartBody.Part.createFormData("file", "logcat.txt", RequestBody.create(MediaType.parse("text/plain"), logString))
+                // Add log attachment
+                addAttachment(AddAttachment.Params(it.id, logPart)) {
+                    it.either({
+                        isLoading.value = false
+                        Log.e("BugSnap", "Failed to upload log: $it")
+                    }, {
+                        isLoading.value = false
+                        Log.i("BugSnap", "Log uploaded successfully! $it")
+                    })
+                }
+            }
         }) }
     }
 }
