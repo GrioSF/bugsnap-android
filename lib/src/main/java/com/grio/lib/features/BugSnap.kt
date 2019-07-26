@@ -4,12 +4,11 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE
-import android.content.Intent
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.View
+import androidx.core.content.ContextCompat.startActivity
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.screenshot
 import com.grio.lib.features.editor.DataHolder
@@ -53,6 +52,7 @@ class BugSnap {
             // Retrieve a SensorManager.
             val sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager?
             var sd : ShakeDetector? = null
+            val log = LogSnapshot()
 
             // Register lifecycle.
             (context as Application).registerActivityLifecycleCallbacks(object: Application.ActivityLifecycleCallbacks {
@@ -69,10 +69,11 @@ class BugSnap {
                              activity?.window?.decorView?.post {
                                  val rootView = activity.window?.decorView as View
                                  val bitmap = rootView.screenshot()
+                                 val logDump = log.updateSnapshot()
 
-                                 val intent = Intent(activity, EditorActivity::class.java)
                                  DataHolder.data = bitmap
-                                 activity.startActivity(intent)
+
+                                 activity.startActivity(EditorActivity.newIntent(activity, logDump))
                              }
                          }
                      })
