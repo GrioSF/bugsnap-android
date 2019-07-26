@@ -17,7 +17,7 @@ class LogSnapshotManager {
                 logcat = Runtime.getRuntime().exec(arrayOf("logcat", "-d"))
 
                 // Read contents and append to log
-                val reader = logcat.inputStream.buffered(1024).bufferedReader()
+                val reader = logcat.inputStream.buffered(4*1024).bufferedReader()
 
                 // usesLines automatically closes the buffer reader on complete
                 reader.useLines { logList = it.toList() }
