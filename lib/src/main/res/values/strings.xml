@@ -12,4 +12,6 @@
     <string name="draw">Draw</string>
     <string name="report_a_bug">Report a bug</string>
     <string name="log_attached">Log attached</string>
+    <string name="record_api_level_too_low">You must be running Android M to use screen recording.</string>
+    <string name="error_device_storage">Unable to write to device storage.</string>
 </resources>

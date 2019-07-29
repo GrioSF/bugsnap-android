@@ -13,7 +13,8 @@
             tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <activity android:name=".MainActivity"
-            android:label="Ugly Duckling">
+            android:label="Ugly Duckling"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
