@@ -11,4 +11,5 @@
     <string name="text">Text</string>
     <string name="draw">Draw</string>
     <string name="report_a_bug">Report a bug</string>
+    <string name="log_attached">Log attached</string>
 </resources>

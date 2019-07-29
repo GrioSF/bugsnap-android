@@ -47,6 +47,6 @@ class EditorViewModelTest : UnitTest() {
             }
         }
 
-        runBlocking { editorViewModel.addButtonClicked("", "", mock(File::class)) }
+        runBlocking { editorViewModel.addButtonClicked("", "", mock(File::class), "07-26 13:16:24.786 11328 11328 D BugSnap : shaking!") }
     }
 }

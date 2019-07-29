@@ -4,10 +4,8 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE
-import android.content.Intent
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.View
 import com.grio.lib.core.di.DaggerInjector
@@ -69,10 +67,11 @@ class BugSnap {
                              activity?.window?.decorView?.post {
                                  val rootView = activity.window?.decorView as View
                                  val bitmap = rootView.screenshot()
+                                 val logDump = LogSnapshotManager.getLogTail()
 
-                                 val intent = Intent(activity, EditorActivity::class.java)
                                  DataHolder.data = bitmap
-                                 activity.startActivity(intent)
+
+                                 activity.startActivity(EditorActivity.newIntent(activity, logDump))
                              }
                          }
                      })

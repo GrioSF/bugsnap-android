@@ -1,5 +1,7 @@
 package com.grio.lib.features.editor
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MenuItem
@@ -23,6 +25,7 @@ import kotlinx.android.synthetic.main.v_bottom_sheet.*
 
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.grio.lib.features.editor.views.*
 
 const val TOOL_OPTIONS_DRAWER_MARGIN = 16
@@ -41,6 +44,15 @@ class EditorActivity : BaseActivity() {
     private lateinit var viewModel: EditorViewModel
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
+    companion object {
+        private val INTENT_LOG = "BUGSNAP_INTENT_LOG"
+
+        fun newIntent(context: Context, logDump: String = "") =
+            Intent(context, EditorActivity::class.java).apply {
+                putExtra(INTENT_LOG, logDump)
+            }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.a_annotation)
@@ -56,6 +68,13 @@ class EditorActivity : BaseActivity() {
         setupToolOptionsDrawerAnimations()
         DataHolder.data?.let {
             screenAnnotator.originalScreenshot = it
+        }
+
+        intent.getStringExtra(INTENT_LOG)?.let {
+            viewModel.log = it
+            log_attached_label.setOnClickListener { previewLog() }
+            log_attached_status.setOnClickListener { previewLog() }
+            log_attached_status.setImageDrawable(getDrawable(R.drawable.ic_check_green))
         }
 
         // Screen annotator event listener
@@ -139,13 +158,24 @@ class EditorActivity : BaseActivity() {
             viewModel.addButtonClicked(
                 summary_input.text.toString(),
                 description_input.text.toString(),
-                DataHolder.toFile(this)
+                DataHolder.toFile(this),
+                viewModel.log
             )
         }
 
         // Cancel button listener.
         cancel_btn.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
+    private fun previewLog() {
+        if (viewModel.log.isNotEmpty()) {
+            AlertDialog.Builder(this).apply {
+                setTitle("Log Preview (Lines: ${viewModel.log.lines().size})")
+                setMessage(viewModel.log)
+                create().show()
+            }
         }
     }
 
