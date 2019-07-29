@@ -56,7 +56,7 @@ class EditorViewModel
 
             // If there's a log attached, upload that as well.
             if (logString.isNotEmpty()) {
-                val logPart = MultipartBody.Part.createFormData("file", "logcat.txt", RequestBody.create(MediaType.parse("text/plain"), logString))
+                val logPart = MultipartBody.Part.createFormData("file", "logcat.log", RequestBody.create(MediaType.parse("text/plain"), logString))
                 // Add log attachment
                 addAttachment(AddAttachment.Params(it.id, logPart)) {
                     it.either({
