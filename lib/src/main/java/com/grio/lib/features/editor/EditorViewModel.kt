@@ -43,6 +43,7 @@ class EditorViewModel
 
             Log.i("BugSnap", "Successfully create issue.")
 
+            // TODO: Parallelize multiple addAttachment calls
             // If successful, add screenshot attachment.
             val filePart = MultipartBody.Part.createFormData("file", file.name, RequestBody.create(MediaType.parse("image/*"), file))
 
