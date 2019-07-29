@@ -17,6 +17,7 @@ class EditorViewModel
 
     var toolOptionsShown: MutableLiveData<Boolean> = MutableLiveData()
     var isLoading: MutableLiveData<Boolean> = MutableLiveData()
+    var log: String = ""
 
     fun toggleToolOptionsDrawer() {
         toolOptionsShown.value?.let {

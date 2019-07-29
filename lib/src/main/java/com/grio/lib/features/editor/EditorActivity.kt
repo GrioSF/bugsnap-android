@@ -44,8 +44,6 @@ class EditorActivity : BaseActivity() {
     private lateinit var viewModel: EditorViewModel
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
-    private var log: String = ""
-
     companion object {
         private val INTENT_LOG = "BUGSNAP_INTENT_LOG"
 
@@ -73,7 +71,7 @@ class EditorActivity : BaseActivity() {
         }
 
         intent.getStringExtra(INTENT_LOG)?.let {
-            log = it
+            viewModel.log = it
             log_attached_label.setOnClickListener { previewLog() }
             log_attached_status.setOnClickListener { previewLog() }
             log_attached_status.setImageDrawable(getDrawable(R.drawable.ic_check_green))
@@ -161,7 +159,7 @@ class EditorActivity : BaseActivity() {
                 summary_input.text.toString(),
                 description_input.text.toString(),
                 DataHolder.toFile(this),
-                log
+                viewModel.log
             )
         }
 
@@ -172,11 +170,12 @@ class EditorActivity : BaseActivity() {
     }
 
     private fun previewLog() {
-        if(log.isNotEmpty()) {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("Log Preview (Lines: ${log.lines().size})")
-            builder.setMessage(log)
-            builder.create().show()
+        if (viewModel.log.isNotEmpty()) {
+            AlertDialog.Builder(this).apply {
+                setTitle("Log Preview (Lines: ${viewModel.log.lines().size})")
+                setMessage(viewModel.log)
+                create().show()
+            }
         }
     }
 
