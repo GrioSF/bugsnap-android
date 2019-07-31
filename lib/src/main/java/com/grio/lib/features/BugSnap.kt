@@ -8,24 +8,16 @@ import android.content.Intent
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.screenshot
 import com.grio.lib.features.editor.DataHolder
 import com.grio.lib.features.editor.EditorActivity
-
-
-
-import com.grio.lib.features.recorder.ReporterActivity
 import com.grio.lib.features.recorder.Recorder
 import com.grio.lib.features.recorder.RecordingFragment
+import com.grio.lib.features.recorder.ReporterActivity
 import java.io.File
-
-
-
-
 
 /**
  * BugSnap allows develops to capture screenshots on device during QA sessions and report
