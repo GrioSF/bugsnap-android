@@ -4,15 +4,20 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE
+import android.content.Intent
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.screenshot
 import com.grio.lib.features.editor.DataHolder
 import com.grio.lib.features.editor.EditorActivity
-
+import com.grio.lib.features.recorder.Recorder
+import com.grio.lib.features.recorder.RecordingFragment
+import com.grio.lib.features.recorder.ReporterActivity
+import java.io.File
 
 /**
  * BugSnap allows develops to capture screenshots on device during QA sessions and report
@@ -62,17 +67,32 @@ class BugSnap {
                      sd = ShakeDetector(object :
                          ShakeDetector.Listener {
                          override fun hearShake() {
-                             Log.d(TAG, "shaking!")
 
-                             activity?.window?.decorView?.post {
-                                 val rootView = activity.window?.decorView as View
-                                 val bitmap = rootView.screenshot()
+                             // Start dialog for choosing
+                             // reporting flow.
+                             val dialog = ReportTypeDialog(object : ReportTypeDialog.SelectionCallback {
+                                 override fun onSelection(type: ReportTypeDialog.ReportType) {
+                                    when (type) {
+                                        ReportTypeDialog.ReportType.SCREENSHOT -> {
+                                            // Begin screenshot flow.
+                                            activity?.window?.decorView?.post {
+                                                val rootView = activity.window?.decorView as View
+                                                val bitmap = rootView.screenshot()
                                  val logDump = LogSnapshotManager.getLogTail()
 
-                                 DataHolder.data = bitmap
 
-                                 activity.startActivity(EditorActivity.newIntent(activity, logDump))
-                             }
+                                                DataHolder.data = bitmap
+                                                activity.startActivity(EditorActivity.newIntent(activity, logDump))
+                                            }
+                                        }
+                                        ReportTypeDialog.ReportType.SCREENRECORD -> {
+                                            // Begin screen recording flow.
+                                            initiateScreenRecording(activity!!, activity)
+                                        }
+                                    }
+                                 }
+                             })
+                             dialog.show(activity!!.fragmentManager, "dialog")
                          }
                      })
 
@@ -94,5 +114,46 @@ class BugSnap {
          * A constant TAG for logging.
          */
         private const val TAG = "BugSnap"
+
+        private fun initiateScreenRecording(context: Context, activity: Activity) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                Toast.makeText(context, com.grio.lib.R.string.record_api_level_too_low, Toast.LENGTH_LONG).show()
+                return
+            }
+
+            val fragmentManager = activity.fragmentManager
+            var fragment: RecordingFragment? = fragmentManager!!.findFragmentByTag(
+                RecordingFragment.TAG
+            ) as RecordingFragment?
+
+            if (fragment == null) {
+                fragment = RecordingFragment()
+                fragment.setPermissionCallback(object : RecordingFragment.PermissionCallback {
+                    override fun onPermissionGranted(resultCode: Int, data: Intent) {
+                        Recorder(context, resultCode, data).apply {
+                            setCallback(object : Recorder.Callback {
+                                override fun onRecordingFinished(file: File) {
+                                    val intent = Intent(context, ReporterActivity::class.java)
+                                    intent.putExtra("videoFile", file)
+                                    context.startActivity(intent)
+                                }
+                             })
+                            showOverlayWithButton()
+                            initiateRecording()
+                        }
+                    }
+
+                    override fun onPermissionDenied(permissionType: RecordingFragment.PermissionType) {
+                        val msg = when (permissionType) {
+                            RecordingFragment.PermissionType.OVERLAY -> "You need to allow the overlay to use screen recording."
+                            RecordingFragment.PermissionType.RECORDING -> "You need to allow screen recording permissions to use screen recording."
+                        }
+
+                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                    }
+                })
+                fragmentManager.beginTransaction().add(fragment, RecordingFragment.TAG).commit()
+            }
+        }
     }
 }
