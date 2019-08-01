@@ -78,8 +78,7 @@ class BugSnap {
                                             activity?.window?.decorView?.post {
                                                 val rootView = activity.window?.decorView as View
                                                 val bitmap = rootView.screenshot()
-                                 val logDump = LogSnapshotManager.getLogTail()
-
+                                                val logDump = LogSnapshotManager.getLogTail()
 
                                                 DataHolder.data = bitmap
                                                 activity.startActivity(EditorActivity.newIntent(activity, logDump))
