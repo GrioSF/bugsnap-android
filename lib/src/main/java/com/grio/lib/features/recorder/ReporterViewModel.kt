@@ -13,13 +13,15 @@ class ReporterViewModel
 @Inject constructor(private val createIssue: CreateIssue, private val addAttachment: AddAttachment) : BaseViewModel() {
 
     var isLoading: MutableLiveData<Boolean> = MutableLiveData()
+    var log: String = ""
+
     private val files = ArrayList<MultipartBody.Part>()
 
     /**
      * Invoked when the "Add Ticket"
      * button is clicked.
      */
-    fun sendReportClicked(summary: String = "Default summary.", description: String = "Default Description.", file: File) {
+    fun sendReportClicked(summary: String = "Default summary.", description: String = "Default Description.", file: File, logString: String = "") {
         // Start loading
         isLoading.value = true
 
@@ -35,6 +37,10 @@ class ReporterViewModel
             // If successful, add attachment.
             if (file.isFile) {
                 files.add(AddAttachment.prepareFilePart(file, "video/*"))
+            }
+
+            if (logString.isNotEmpty()) {
+                files.add(AddAttachment.prepareFilePart("logcat.log", logString, "text/plain"))
             }
 
             addAttachment(AddAttachment.Params(it.id, files)) { it.either({

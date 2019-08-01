@@ -21,6 +21,7 @@ import com.grio.lib.features.editor.views.ScreenAnnotator
 import com.grio.lib.features.editor.views.Tool
 import com.grio.lib.features.editor.views.ToolOptions
 import kotlinx.android.synthetic.main.a_annotation.*
+import com.grio.lib.features.LogSnapshotManager
 import kotlinx.android.synthetic.main.a_reporter.*
 
 import java.io.File
@@ -80,7 +81,8 @@ class ReporterActivity :  BaseActivity() {
             if (summary.isNullOrBlank() || description.isNullOrBlank()) {
                 Toast.makeText(this, "Inputs must not be blank.", Toast.LENGTH_SHORT).show()
             } else {
-                viewModel.sendReportClicked(summary = summary, description = description, file = videoFile)
+                viewModel.log = LogSnapshotManager.getLogTail()
+                viewModel.sendReportClicked(summary = summary, description = description, file = videoFile, logString = viewModel.log)
             }
 
             return true
