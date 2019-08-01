@@ -89,16 +89,19 @@ class EditorActivity : BaseActivity() {
             when {
                 it.itemId == R.id.draw -> {
                     screenAnnotator.currentTool = Tool.PEN
+                    screenAnnotator.resetTextAnnotation()
                     viewModel.toolOptionsShown.value = true
                     toolOptions.setDrawerType(ToolDrawerType.SLIDER)
                 }
                 it.itemId == R.id.insertText -> {
                     screenAnnotator.currentTool = Tool.TEXT
+                    screenAnnotator.resetTextAnnotation()
                     viewModel.toolOptionsShown.value = true
                     toolOptions.setDrawerType(ToolDrawerType.SLIDER)
                 }
                 it.itemId == R.id.insertShape -> {
                     screenAnnotator.currentTool = Tool.SHAPE
+                    screenAnnotator.resetTextAnnotation()
                     viewModel.toolOptionsShown.value = true
                     toolOptions.setDrawerType(ToolDrawerType.SHAPES)
                 }
@@ -137,6 +140,7 @@ class EditorActivity : BaseActivity() {
 
         // Confirmation button click listener
         confirmAnnotations.setOnClickListener {
+            screenAnnotator.resetTextAnnotation()
             DataHolder.data = screenAnnotator.getAnnotatedScreenshot()
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
