@@ -39,7 +39,7 @@ class EditorViewModelTest : UnitTest() {
         val responseBody = mock(ResponseBody::class)
 
         given { runBlocking { createIssue.run(CreateIssue.Params("test", "test")) } }.willReturn(Either.Right(CreateIssueResponse("123", "BSP-22", "example.com/123")))
-        given { runBlocking { addAttachment.run(AddAttachment.Params("123", mock(MultipartBody.Part::class))) } }.willReturn(Either.Right(responseBody))
+        given { runBlocking { addAttachment.run(AddAttachment.Params("123", listOf(mock(MultipartBody.Part::class)))) } }.willReturn(Either.Right(responseBody))
 
         editorViewModel.isLoading.observeForever {
             with(it) {

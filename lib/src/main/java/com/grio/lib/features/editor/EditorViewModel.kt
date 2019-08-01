@@ -5,9 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.grio.lib.core.platform.BaseViewModel
 import com.grio.lib.features.editor.cases.AddAttachment
 import com.grio.lib.features.editor.cases.CreateIssue
-import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import java.io.File
 import javax.inject.Inject
 
@@ -18,6 +16,8 @@ class EditorViewModel
     var toolOptionsShown: MutableLiveData<Boolean> = MutableLiveData()
     var isLoading: MutableLiveData<Boolean> = MutableLiveData()
     var log: String = ""
+
+    private val files = ArrayList<MultipartBody.Part>()
 
     fun toggleToolOptionsDrawer() {
         toolOptionsShown.value?.let {
@@ -43,32 +43,22 @@ class EditorViewModel
 
             Log.i("BugSnap", "Successfully create issue.")
 
-            // TODO: Parallelize multiple addAttachment calls
-            // If successful, add screenshot attachment.
-            val filePart = MultipartBody.Part.createFormData("file", file.name, RequestBody.create(MediaType.parse("image/*"), file))
+            if (file.isFile) {
+                files.add(AddAttachment.prepareFilePart(file, "image/*"))
+            }
 
-            addAttachment(AddAttachment.Params(it.id, filePart)) { it.either({
+
+            if (logString.isNotEmpty()) {
+                files.add(AddAttachment.prepareFilePart("logcat.log", logString, "text/plain"))
+            }
+
+            addAttachment(AddAttachment.Params(it.id, files)) { it.either({
                 isLoading.value = false
-                Log.e("BugSnap", "Failed to upload screenshot: $it")
+                Log.e("BugSnap", "Failed to upload attachments: $it")
             }, {
                 isLoading.value = false
-                Log.i("BugSnap", "Screenshot uploaded successfully! $it")
+                Log.i("BugSnap", "Attachments uploaded successfully! $it")
             })}
-
-            // If there's a log attached, upload that as well.
-            if (logString.isNotEmpty()) {
-                val logPart = MultipartBody.Part.createFormData("file", "logcat.log", RequestBody.create(MediaType.parse("text/plain"), logString))
-                // Add log attachment
-                addAttachment(AddAttachment.Params(it.id, logPart)) {
-                    it.either({
-                        isLoading.value = false
-                        Log.e("BugSnap", "Failed to upload log: $it")
-                    }, {
-                        isLoading.value = false
-                        Log.i("BugSnap", "Log uploaded successfully! $it")
-                    })
-                }
-            }
-        }) }
+        })}
     }
 }

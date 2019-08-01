@@ -17,7 +17,7 @@ interface JiraRepository {
 
     fun createIssue(summary: String, description: String): Either<Failure, CreateIssueResponse>
     fun getCreationMeta(): Either<Failure, CreationMeta>
-    fun addAttachment(issueId: String, file: MultipartBody.Part) : Either<Failure, ResponseBody>
+    fun addAttachment(issueId: String, files: List<MultipartBody.Part>) : Either<Failure, ResponseBody>
 
     /**
      * A [JiraRepository] implementation for network calls.
@@ -27,9 +27,9 @@ interface JiraRepository {
                         private val service: JiraService
     ) : JiraRepository {
 
-        override fun addAttachment(issueId: String, file: MultipartBody.Part): Either<Failure, ResponseBody> {
+        override fun addAttachment(issueId: String, files: List<MultipartBody.Part>): Either<Failure, ResponseBody> {
             return when (networkHandler.isConnected) {
-                true -> request(service.addAttachment(issueId, file), { it }, ResponseBody.create(MediaType.parse(""), ""))
+                true -> request(service.addAttachment(issueId, files), { it }, ResponseBody.create(MediaType.parse(""), ""))
                 false, null -> Either.Left(Failure.NetworkConnection())
             }
         }

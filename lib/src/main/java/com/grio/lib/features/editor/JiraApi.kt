@@ -18,13 +18,13 @@ internal interface JiraApi {
     fun createIssue(@Body req: CreateIssueRequest) : Call<CreateIssueResponse>
 
     /**
-     * Add an attachment to an issue.
+     * Add one or more attachments to an issue.
      */
     @Multipart
     @Headers("X-Atlassian-Token: no-check")
     @POST("rest/api/2/issue/{issueId}/attachments")
     fun addAttachment(@Path("issueId") issueId: String,
-                      @Part filePart: MultipartBody.Part): Call<ResponseBody>
+                      @Part filePart: List<MultipartBody.Part>): Call<ResponseBody>
 
 
     /**
