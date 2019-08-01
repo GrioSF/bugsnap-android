@@ -12,18 +12,19 @@ import javax.inject.Inject
 class AddAttachment
 @Inject constructor(private val repository: JiraRepository) : UseCase<ResponseBody, AddAttachment.Params>() {
 
-    val fileKey: String = "file"
+    companion object {
+        private val fileKey: String = "file"
+
+        fun prepareFilePart(file: File, mimetype: String): MultipartBody.Part {
+            return MultipartBody.Part.createFormData(fileKey, file.name, RequestBody.create(MediaType.parse(mimetype), file))
+        }
+
+        fun prepareFilePart(name: String, string: String, mimetype: String): MultipartBody.Part {
+            return MultipartBody.Part.createFormData(fileKey, name, RequestBody.create(MediaType.parse(mimetype), string))
+        }
+    }
 
     override suspend fun run(params: Params?) = repository.addAttachment(params!!.issueId, params.attachment)
 
     data class Params(val issueId: String, val attachment: List<MultipartBody.Part>)
-
-    fun prepareFilePart(file: File, mimetype: String): MultipartBody.Part {
-        return MultipartBody.Part.createFormData(fileKey, file.name, RequestBody.create(MediaType.parse(mimetype), file))
-    }
-
-    fun prepareFilePart(name: String, string: String, mimetype: String): MultipartBody.Part {
-        return MultipartBody.Part.createFormData(fileKey, name, RequestBody.create(MediaType.parse(mimetype), string))
-    }
-
 }

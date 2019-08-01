@@ -5,9 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.grio.lib.core.platform.BaseViewModel
 import com.grio.lib.features.editor.cases.AddAttachment
 import com.grio.lib.features.editor.cases.CreateIssue
-import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import java.io.File
 import javax.inject.Inject
 
@@ -36,7 +34,7 @@ class ReporterViewModel
 
             // If successful, add attachment.
             if (file.isFile) {
-                files.add(addAttachment.prepareFilePart(file, "video/*"))
+                files.add(AddAttachment.prepareFilePart(file, "video/*"))
             }
 
             addAttachment(AddAttachment.Params(it.id, files)) { it.either({

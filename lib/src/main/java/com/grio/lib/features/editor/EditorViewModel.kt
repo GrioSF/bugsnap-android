@@ -5,9 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.grio.lib.core.platform.BaseViewModel
 import com.grio.lib.features.editor.cases.AddAttachment
 import com.grio.lib.features.editor.cases.CreateIssue
-import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import java.io.File
 import javax.inject.Inject
 
@@ -46,12 +44,12 @@ class EditorViewModel
             Log.i("BugSnap", "Successfully create issue.")
 
             if (file.isFile) {
-                files.add(addAttachment.prepareFilePart(file, "image/*"))
+                files.add(AddAttachment.prepareFilePart(file, "image/*"))
             }
 
 
             if (logString.isNotEmpty()) {
-                files.add(addAttachment.prepareFilePart("logcat.log", logString, "text/plain"))
+                files.add(AddAttachment.prepareFilePart("logcat.log", logString, "text/plain"))
             }
 
             addAttachment(AddAttachment.Params(it.id, files)) { it.either({
