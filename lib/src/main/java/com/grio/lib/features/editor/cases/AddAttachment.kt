@@ -13,14 +13,14 @@ class AddAttachment
 @Inject constructor(private val repository: JiraRepository) : UseCase<ResponseBody, AddAttachment.Params>() {
 
     companion object {
-        private val fileKey: String = "file"
+        private const val FILE_KEY: String = "file"
 
         fun prepareFilePart(file: File, mimetype: String): MultipartBody.Part {
-            return MultipartBody.Part.createFormData(fileKey, file.name, RequestBody.create(MediaType.parse(mimetype), file))
+            return MultipartBody.Part.createFormData(FILE_KEY, file.name, RequestBody.create(MediaType.parse(mimetype), file))
         }
 
         fun prepareFilePart(name: String, string: String, mimetype: String): MultipartBody.Part {
-            return MultipartBody.Part.createFormData(fileKey, name, RequestBody.create(MediaType.parse(mimetype), string))
+            return MultipartBody.Part.createFormData(FILE_KEY, name, RequestBody.create(MediaType.parse(mimetype), string))
         }
     }
 
