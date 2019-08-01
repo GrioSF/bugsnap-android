@@ -66,7 +66,7 @@ class JiraRepositoryTest : UnitTest() {
     fun `login service should return network failure when no connection`() {
         given { networkHandler.isConnected }.willReturn(false)
 
-        val res = networkRepository.addAttachment("123", mock(MultipartBody.Part::class))
+        val res = networkRepository.addAttachment("123", listOf(mock(MultipartBody.Part::class)))
 
         res shouldBeInstanceOf Either::class.java
         res.isLeft shouldEqual true
@@ -78,7 +78,7 @@ class JiraRepositoryTest : UnitTest() {
     fun `login service should return network failure when undefined connection`() {
         given { networkHandler.isConnected }.willReturn(null)
 
-        val res = networkRepository.addAttachment("123", mock(MultipartBody.Part::class))
+        val res = networkRepository.addAttachment("123", listOf(mock(MultipartBody.Part::class)))
 
         res shouldBeInstanceOf Either::class.java
         res.isLeft shouldEqual true
