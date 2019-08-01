@@ -104,27 +104,23 @@ class ScreenAnnotator @JvmOverloads constructor(
                 keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty() -> {
                     textInput.delete(textInput.length - 1, textInput.length)
                     (annotations.last() as TextAnnotation).text = textInput.toString()
-                    invalidate()
                 }
                 keyCode == KeyEvent.KEYCODE_ENTER -> {
-                    textToolState = NONE
-                    textInput.clear()
+                    resetTextAnnotation()
                     imm.hideSoftInputFromWindow(windowToken, 0)
-                    invalidate()
                 }
                 keyCode == KeyEvent.KEYCODE_BACK -> {
-                    textToolState = NONE
-                    textInput.clear()
-                    invalidate()
+                    resetTextAnnotation()
                 }
                 else -> {
                     if (event != null) {
                         textInput.append(event.unicodeChar.toChar())
                     }
                     (annotations.last() as TextAnnotation).text = textInput.toString()
-                    invalidate()
                 }
             }
+            invalidate()
+
         }
         if (event != null) {
             lastClick = event
@@ -135,8 +131,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     // Handle hardware back press
     override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
         if (event?.action == KeyEvent.ACTION_UP && event.keyCode == KeyEvent.KEYCODE_BACK) {
-            textToolState = NONE
-            textInput.clear()
+            resetTextAnnotation()
             invalidate()
             return super.onKeyPreIme(keyCode, event)
         }
@@ -182,7 +177,8 @@ class ScreenAnnotator @JvmOverloads constructor(
      */
     private fun handleTextToolTouchEvent(event: MotionEvent?) {
         if (event?.action == MotionEvent.ACTION_UP) {
-            if (!annotationWasSelected(event.x, event.y) && textToolState == NONE) {
+            if (textToolState != NONE) resetTextAnnotation()
+            if (!annotationWasSelected(event.x, event.y)) {
                 textToolState = INITIALIZING
                 initializeTextAnnotation(event.x, event.y)
             } else {
@@ -266,6 +262,19 @@ class ScreenAnnotator @JvmOverloads constructor(
         annotations.add(newAnnotation)
         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY)
         textToolState = TYPING
+    }
+
+    /**
+     * Resets the text annotation state to allow for
+     * multiple tool usages
+     *
+     * TODO: remove this function and control state in a way that
+     * textToolState shouldn't be manually set every time
+     * a tool is changed ot the confirmation button is pressed
+     */
+    fun resetTextAnnotation() {
+        textToolState = NONE
+        textInput.clear()
     }
 
     /**
