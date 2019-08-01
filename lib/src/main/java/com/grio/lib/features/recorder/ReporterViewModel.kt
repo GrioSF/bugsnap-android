@@ -15,7 +15,7 @@ class ReporterViewModel
 @Inject constructor(private val createIssue: CreateIssue, private val addAttachment: AddAttachment) : BaseViewModel() {
 
     var isLoading: MutableLiveData<Boolean> = MutableLiveData()
-
+    private val files = ArrayList<MultipartBody.Part>()
 
     /**
      * Invoked when the "Add Ticket"
@@ -35,9 +35,11 @@ class ReporterViewModel
             Log.i("BugSnap", "Successfully create issue.")
 
             // If successful, add attachment.
-            val filePart = MultipartBody.Part.createFormData("file", file.name, RequestBody.create(MediaType.parse("video/*"), file))
+            if (file.isFile) {
+                files.add(addAttachment.prepareFilePart(file, "video/*"))
+            }
 
-            addAttachment(AddAttachment.Params(it.id, filePart)) { it.either({
+            addAttachment(AddAttachment.Params(it.id, files)) { it.either({
                 isLoading.value = false
                 Log.e("BugSnap", "Failed to upload attachment: $it")
             }, {

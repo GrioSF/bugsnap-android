@@ -22,6 +22,6 @@ class JiraService
 
     override fun getCreationMeta() = jiraApi.getCreationMeta()
 
-    override fun addAttachment(issueId: String, filePart: MultipartBody.Part) = jiraApi.addAttachment(issueId, filePart)
+    override fun addAttachment(issueId: String, fileParts: List<MultipartBody.Part>) = jiraApi.addAttachment(issueId, fileParts)
 
 }
