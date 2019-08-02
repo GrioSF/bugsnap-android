@@ -80,3 +80,4 @@ lint/tmp/
 lint/reports/
 /upload.jks
 /keystore.properties
+.gradletasknamecache
