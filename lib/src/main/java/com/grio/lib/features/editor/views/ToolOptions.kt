@@ -3,12 +3,13 @@ package com.grio.lib.features.editor.views
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.grio.lib.R
 
 const val CARET_DIMEN = 12
@@ -18,38 +19,33 @@ class ToolOptions @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0
-) : LinearLayout(context, attrs, defStyle) {
+) : ConstraintLayout(context, attrs, defStyle) {
 
     private val caret = context.getDrawable(R.drawable.caret_icon)
     private val density = context.resources.displayMetrics.density.toInt()
-    private var margin = 0
     private var arrowDimen = CARET_DIMEN * density
-    private val colorPicker = ColorPicker(context)
-    private val slider = SeekBar(context)
-    private val shapeButtonHolder = LinearLayout(context)
-    private val rectangleButton = ImageButton(context)
-    private val circleButton = ImageButton(context)
-    private val arrowButton = ImageButton (context)
+    private val colorPicker: ColorPicker
+    private val slider: SeekBar
+    private val shapeButtonHolder: LinearLayout
+    private val rectangleButton: ImageView
+    private val circleButton: ImageView
+    private val arrowButton: ImageView
+    private val sizeLabel: TextView
+    private val shapeLabel: TextView
     lateinit var listener: Listener
     private var toolOptionsDrawerType = ToolDrawerType.SLIDER
 
     init {
-        addView(colorPicker)
-        addView(slider)
-        addView(shapeButtonHolder)
+        View.inflate(context, R.layout.v_tool_options, this)
+        colorPicker = findViewById(R.id.color_picker)
+        slider = findViewById(R.id.slider)
+        shapeButtonHolder = findViewById(R.id.shape_button_holder)
+        rectangleButton = findViewById(R.id.rectangle_shape)
+        circleButton = findViewById(R.id.circle_shape)
+        arrowButton = findViewById(R.id.arrow_shape)
+        sizeLabel = findViewById(R.id.size_label)
+        shapeLabel = findViewById(R.id.shape_label)
 
-        shapeButtonHolder.addView(rectangleButton)
-        shapeButtonHolder.addView(circleButton)
-        shapeButtonHolder.addView(arrowButton)
-        shapeButtonHolder.orientation = HORIZONTAL
-        shapeButtonHolder.weightSum = 3f
-
-        rectangleButton.setImageDrawable(context.getDrawable(R.drawable.rectangle_shape_tool_icon))
-        arrowButton.setImageDrawable(context.getDrawable(R.drawable.arrow_shape_tool_icon))
-        circleButton.setImageDrawable(context.getDrawable(R.drawable.circle_shape_tool_icon))
-        rectangleButton.background = null
-        arrowButton.background = null
-        circleButton.background = null
         colorPicker.visibility = GONE
         slider.visibility = GONE
         shapeButtonHolder.visibility = GONE
@@ -77,32 +73,6 @@ class ToolOptions @JvmOverloads constructor(
         rectangleButton.setOnClickListener { listener.shapeSelected(Shape.RECTANGLE) }
         circleButton.setOnClickListener { listener.shapeSelected(Shape.CIRCLE) }
         arrowButton.setOnClickListener { listener.shapeSelected(Shape.ARROW) }
-    }
-
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        super.onLayout(changed, l, t, r, b)
-
-        if (margin <= 0) {
-            arrowDimen = CARET_DIMEN * density
-            margin = CARET_MARGIN * density
-            layoutParams.width = context.resources.displayMetrics.widthPixels - margin
-
-            val params = LayoutParams(LayoutParams.MATCH_PARENT, height / 2)
-            params.marginStart = arrowDimen * 4
-            params.marginEnd = arrowDimen * 4
-            params.gravity = Gravity.CENTER
-
-            val buttonParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
-            buttonParams.weight = 1f
-            params.gravity = Gravity.CENTER
-
-            slider.layoutParams = params
-            colorPicker.layoutParams = params
-            arrowButton.layoutParams = buttonParams
-            rectangleButton.layoutParams = buttonParams
-            circleButton.layoutParams = buttonParams
-            shapeButtonHolder.layoutParams = params
-        }
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -134,11 +104,15 @@ class ToolOptions @JvmOverloads constructor(
     fun setDrawerType(type: ToolDrawerType) {
         toolOptionsDrawerType = type
         if (toolOptionsDrawerType == ToolDrawerType.SLIDER) {
-            slider.visibility = View.VISIBLE
             shapeButtonHolder.visibility = View.GONE
+            shapeLabel.visibility = View.GONE
+            slider.visibility = View.VISIBLE
+            sizeLabel.visibility = View.VISIBLE
         } else if (toolOptionsDrawerType == ToolDrawerType.SHAPES) {
             slider.visibility = View.GONE
+            sizeLabel.visibility = View.GONE
             shapeButtonHolder.visibility = View.VISIBLE
+            shapeLabel.visibility = View.VISIBLE
         }
     }
 

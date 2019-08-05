@@ -41,7 +41,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var selectedAnnotation: BaseAnnotation? = null
     var selectedShapeType = Shape.RECTANGLE
     var attemptToSelectAnnotation = false
-    var currentTool = Tool.NONE
+    var currentTool = Tool.PEN
 
     lateinit var listener: Listener
     lateinit var originalScreenshot: Bitmap

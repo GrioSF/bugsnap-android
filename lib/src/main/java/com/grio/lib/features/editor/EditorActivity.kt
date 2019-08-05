@@ -140,10 +140,11 @@ class EditorActivity : BaseActivity() {
             for (child in toolOptions.children) {
                 child.animate().alpha(if (isShown) 1.0f else 0.0f)
             }
-            TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
-            if (isShown) expandedToolOptions.applyTo(toolConstraintLayout) else collapsedToolOptions.applyTo(
-                toolConstraintLayout
-            )
+
+//            TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
+//            if (isShown) expandedToolOptions.applyTo(toolConstraintLayout) else collapsedToolOptions.applyTo(
+//                toolConstraintLayout
+//            )
         }
     }
 
@@ -158,8 +159,8 @@ class EditorActivity : BaseActivity() {
             ConstraintSet.PARENT_ID, ConstraintSet.START,
             TOOL_OPTIONS_DRAWER_MARGIN * resources.displayMetrics.density.toInt()
         )
-        toolOptionsTransition.interpolator = DecelerateInterpolator(TOOL_OPTIONS_DECELERATE_FACTOR)
-        toolOptionsTransition.duration = TOOL_OPTIONS_DRAWER_ANIMATION_DURATION
+//        toolOptionsTransition.interpolator = DecelerateInterpolator(TOOL_OPTIONS_DECELERATE_FACTOR)
+//        toolOptionsTransition.duration = TOOL_OPTIONS_DRAWER_ANIMATION_DURATION
     }
 
     /**
