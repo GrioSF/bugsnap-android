@@ -11,8 +11,8 @@
                   android:launchMode="singleInstance"
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
-        <activity android:name=".features.recorder.ReporterActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".features.reporter.ReporterActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
 
     </application>
 

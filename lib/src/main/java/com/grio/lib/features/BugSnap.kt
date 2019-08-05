@@ -16,7 +16,7 @@ import com.grio.lib.features.editor.DataHolder
 import com.grio.lib.features.editor.EditorActivity
 import com.grio.lib.features.recorder.Recorder
 import com.grio.lib.features.recorder.RecordingFragment
-import com.grio.lib.features.recorder.ReporterActivity
+import com.grio.lib.features.reporter.ReporterActivity
 import java.io.File
 
 /**
@@ -134,6 +134,7 @@ class BugSnap {
                                 override fun onRecordingFinished(file: File) {
                                     val intent = Intent(context, ReporterActivity::class.java)
                                     intent.putExtra("videoFile", file)
+                                    intent.putExtra("reportType", "video")
                                     context.startActivity(intent)
                                 }
                              })

@@ -1,4 +1,4 @@
-package com.grio.lib.features.recorder
+package com.grio.lib.features.reporter
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -21,7 +21,11 @@ class ReporterViewModel
      * Invoked when the "Add Ticket"
      * button is clicked.
      */
-    fun sendReportClicked(summary: String = "Default summary.", description: String = "Default Description.", file: File, logString: String = "") {
+    fun sendReportClicked(summary: String = "Default summary.",
+                          description: String = "Default Description.",
+                          file: File,
+                          logString: String = "",
+                          isVideo: Boolean = false) {
         // Start loading
         isLoading.value = true
 
@@ -36,7 +40,8 @@ class ReporterViewModel
 
             // If successful, add attachment.
             if (file.isFile) {
-                files.add(AddAttachment.prepareFilePart(file, "video/*"))
+                val mimeType = if (isVideo) "video/*" else "image/*"
+                files.add(AddAttachment.prepareFilePart(file, mimeType))
             }
 
             if (logString.isNotEmpty()) {

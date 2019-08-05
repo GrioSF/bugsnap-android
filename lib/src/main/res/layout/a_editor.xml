@@ -73,6 +73,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- include bottom sheet -->
-    <include layout="@layout/v_bottom_sheet" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

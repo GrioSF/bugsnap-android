@@ -1,5 +1,6 @@
 package com.grio.lib.features.editor
 
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -16,17 +17,10 @@ import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.observe
 import com.grio.lib.core.extension.viewModels
 import com.grio.lib.core.platform.BaseActivity
-
-import kotlinx.android.synthetic.main.a_annotation.*
-import javax.inject.Inject
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-
-import kotlinx.android.synthetic.main.v_bottom_sheet.*
-
-import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.grio.lib.features.editor.views.*
+import com.grio.lib.features.reporter.ReporterActivity
+import kotlinx.android.synthetic.main.a_editor.*
+import javax.inject.Inject
 
 const val TOOL_OPTIONS_DRAWER_MARGIN = 16
 const val TOOL_OPTIONS_DRAWER_ANIMATION_DURATION = 500L
@@ -42,7 +36,6 @@ class EditorActivity : BaseActivity() {
     private val toolOptionsTransition = ChangeBounds()
 
     private lateinit var viewModel: EditorViewModel
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     companion object {
         private val INTENT_LOG = "BUGSNAP_INTENT_LOG"
@@ -55,12 +48,11 @@ class EditorActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.a_annotation)
+        setContentView(R.layout.a_editor)
         DaggerInjector.getComponent().inject(this)
 
         viewModel = viewModels(viewModelFactory) {
             observe(toolOptionsShown, ::handleToolOptions)
-            observe(isLoading, ::renderLoading)
         }
         viewModel.toolOptionsShown.value = false
 
@@ -68,13 +60,6 @@ class EditorActivity : BaseActivity() {
         setupToolOptionsDrawerAnimations()
         DataHolder.data?.let {
             screenAnnotator.originalScreenshot = it
-        }
-
-        intent.getStringExtra(INTENT_LOG)?.let {
-            viewModel.log = it
-            log_attached_label.setOnClickListener { previewLog() }
-            log_attached_status.setOnClickListener { previewLog() }
-            log_attached_status.setImageDrawable(getDrawable(R.drawable.ic_check_green))
         }
 
         // Screen annotator event listener
@@ -135,64 +120,14 @@ class EditorActivity : BaseActivity() {
 
         }
 
-        // Initialize bottom sheet behavior.
-        bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
-
         // Confirmation button click listener
         confirmAnnotations.setOnClickListener {
             screenAnnotator.resetTextAnnotation()
             DataHolder.data = screenAnnotator.getAnnotatedScreenshot()
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        }
-
-        // Add details button/label
-        add_details_label.setOnClickListener {
-            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-
-        // Add Ticket button click listener.
-        add_btn.setOnClickListener {
-            // Check inputs
-            if (summary_input.text.isNullOrBlank()) {
-                Toast.makeText(this@EditorActivity, "Summary must not be empty.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            viewModel.addButtonClicked(
-                summary_input.text.toString(),
-                description_input.text.toString(),
-                DataHolder.toFile(this),
-                viewModel.log
-            )
-        }
-
-        // Cancel button listener.
-        cancel_btn.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        }
-    }
-
-    private fun previewLog() {
-        if (viewModel.log.isNotEmpty()) {
-            AlertDialog.Builder(this).apply {
-                setTitle("Log Preview (Lines: ${viewModel.log.lines().size})")
-                setMessage(viewModel.log)
-                create().show()
-            }
-        }
-    }
-
-    private fun renderLoading(isLoading: Boolean?) {
-        if (add_btn_progress != null && isLoading != null) {
-            add_btn_progress.visibility = if (isLoading) View.VISIBLE else View.INVISIBLE
-            add_btn.text = if (isLoading) "" else "Add Ticket"
-            if (isLoading == false && bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-                // Flow complete, close and exit.
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                Toast.makeText(this, "Ticket successfully created.", Toast.LENGTH_SHORT).show()
-                finish()
-            }
+            // Launch Reporter
+            val intent = Intent(this, ReporterActivity::class.java)
+            intent.putExtra("reportType", "screenshot")
+            startActivity(intent)
         }
     }
 
