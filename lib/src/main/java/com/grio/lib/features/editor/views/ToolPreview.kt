@@ -1,5 +1,8 @@
 package com.grio.lib.features.editor.views
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,7 +10,12 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import com.grio.lib.R
+
+const val PREVIEW_FADE_DURATION = 200L
+const val VISIBLE_ALPHA = 1f
+const val INVISIBLE_ALPHA = 0f
 
 class ToolPreview @JvmOverloads constructor(
     context: Context,
@@ -59,20 +67,21 @@ class ToolPreview @JvmOverloads constructor(
         super.onDraw(canvas)
         when (previewType) {
             Tool.PEN -> {
-                canvas?.drawCircle(width/2f, height/2f, size/2, paint)
+                canvas?.drawCircle(width / 2f, height / 2f, size / 2, paint)
             }
             Tool.TEXT -> {
                 canvas?.drawRect(
-                    width/2f - size,
-                    height/2f - size,
-                    width/2f + size,
-                    height/2f + size,
-                    textBackgroundBrush)
+                    width / 2f - size,
+                    height / 2f - size,
+                    width / 2f + size,
+                    height / 2f + size,
+                    textBackgroundBrush
+                )
 
                 canvas?.drawText(
                     "A",
-                    width/2f - textWidth / 2,
-                    height/2f + size / 4,
+                    width / 2f - textWidth / 2,
+                    height / 2f + size / 4,
                     textBrush
                 )
             }
@@ -91,9 +100,6 @@ class ToolPreview @JvmOverloads constructor(
                         arrowIcon!!.draw(canvas!!)
                     }
                 }
-            }
-            Tool.NONE -> {
-                // no op
             }
         }
     }
@@ -115,12 +121,54 @@ class ToolPreview @JvmOverloads constructor(
     }
 
     fun updateTool(tool: Tool) {
-        this.previewType = tool
-        invalidate()
+        val disappearAnimation = ValueAnimator.ofFloat(VISIBLE_ALPHA, INVISIBLE_ALPHA)
+        disappearAnimation.duration = PREVIEW_FADE_DURATION
+        disappearAnimation.interpolator = AccelerateDecelerateInterpolator()
+        disappearAnimation.addUpdateListener { valueAnimator ->
+            alpha = valueAnimator.animatedValue as Float
+            invalidate()
+        }
+        disappearAnimation.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                super.onAnimationEnd(animation)
+                if (previewType != tool) previewType = tool
+
+                val reappearAnimation = ValueAnimator.ofFloat(INVISIBLE_ALPHA, VISIBLE_ALPHA)
+                reappearAnimation.duration = PREVIEW_FADE_DURATION
+                reappearAnimation.interpolator = AccelerateDecelerateInterpolator()
+                reappearAnimation.addUpdateListener { valueAnimator ->
+                    alpha = valueAnimator.animatedValue as Float
+                    invalidate()
+                }
+                reappearAnimation.start()
+            }
+        })
+        disappearAnimation.start()
     }
 
     fun updateShape(selectedShape: Shape) {
-        this.shape = selectedShape
-        invalidate()
+        val disappearAnimation = ValueAnimator.ofFloat(VISIBLE_ALPHA, INVISIBLE_ALPHA)
+        disappearAnimation.duration = PREVIEW_FADE_DURATION
+        disappearAnimation.interpolator = AccelerateDecelerateInterpolator()
+        disappearAnimation.addUpdateListener { valueAnimator ->
+            alpha = valueAnimator.animatedValue as Float
+            invalidate()
+        }
+        disappearAnimation.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                super.onAnimationEnd(animation)
+                if (shape != selectedShape) shape = selectedShape
+
+                val reappearAnimation = ValueAnimator.ofFloat(INVISIBLE_ALPHA, VISIBLE_ALPHA)
+                reappearAnimation.duration = PREVIEW_FADE_DURATION
+                reappearAnimation.interpolator = AccelerateDecelerateInterpolator()
+                reappearAnimation.addUpdateListener { valueAnimator ->
+                    alpha = valueAnimator.animatedValue as Float
+                    invalidate()
+                }
+                reappearAnimation.start()
+            }
+        })
+        disappearAnimation.start()
     }
 }

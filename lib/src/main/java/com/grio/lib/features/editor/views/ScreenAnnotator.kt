@@ -89,9 +89,6 @@ class ScreenAnnotator @JvmOverloads constructor(
             Tool.SHAPE -> {
                 handleShapeToolTouchEvent(event)
             }
-            Tool.NONE -> {
-                // TODO: To be used for dragging
-            }
         }
         invalidate()
         return true
@@ -354,7 +351,7 @@ class ScreenAnnotator @JvmOverloads constructor(
 }
 
 enum class Tool {
-    PEN, TEXT, SHAPE, NONE
+    PEN, TEXT, SHAPE
 }
 
 enum class Shape {
