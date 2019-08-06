@@ -1,18 +1,14 @@
 package com.grio.lib.features.editor.views
 
 import android.content.Context
-import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.SeekBar
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.grio.lib.R
+import kotlinx.android.synthetic.main.v_tool_options.view.*
 
-const val CARET_DIMEN = 12
 const val CARET_MARGIN = 16
 
 class ToolOptions @JvmOverloads constructor(
@@ -21,44 +17,24 @@ class ToolOptions @JvmOverloads constructor(
     defStyle: Int = 0
 ) : ConstraintLayout(context, attrs, defStyle) {
 
-    private val caret = context.getDrawable(R.drawable.caret_icon)
     private val density = context.resources.displayMetrics.density.toInt()
-    private var arrowDimen = CARET_DIMEN * density
-    private val colorPicker: ColorPicker
-    private val slider: SeekBar
-    private val shapeButtonHolder: LinearLayout
-    private val rectangleButton: ImageView
-    private val circleButton: ImageView
-    private val arrowButton: ImageView
-    private val sizeLabel: TextView
-    private val shapeLabel: TextView
     lateinit var listener: Listener
-    private var toolOptionsDrawerType = ToolDrawerType.SLIDER
+    private var currentTool = Tool.PEN
 
     init {
         View.inflate(context, R.layout.v_tool_options, this)
-        colorPicker = findViewById(R.id.color_picker)
-        slider = findViewById(R.id.slider)
-        shapeButtonHolder = findViewById(R.id.shape_button_holder)
-        rectangleButton = findViewById(R.id.rectangle_shape)
-        circleButton = findViewById(R.id.circle_shape)
-        arrowButton = findViewById(R.id.arrow_shape)
-        sizeLabel = findViewById(R.id.size_label)
-        shapeLabel = findViewById(R.id.shape_label)
 
-        colorPicker.visibility = GONE
-        slider.visibility = GONE
-        shapeButtonHolder.visibility = GONE
-
-        colorPicker.listener = object : ColorPicker.Listener {
+        color_picker.listener = object : ColorPicker.Listener {
             override fun colorPicked(color: String) {
                 listener.colorSelected(color)
+                tool_preview.updateColor(color)
             }
         }
 
-        slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        size_slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 listener.strokeWidthSet(progress.toFloat())
+                tool_preview.updateSize(progress.toFloat())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -70,22 +46,9 @@ class ToolOptions @JvmOverloads constructor(
             }
         })
 
-        rectangleButton.setOnClickListener { listener.shapeSelected(Shape.RECTANGLE) }
-        circleButton.setOnClickListener { listener.shapeSelected(Shape.CIRCLE) }
-        arrowButton.setOnClickListener { listener.shapeSelected(Shape.ARROW) }
-    }
-
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        caret?.setBounds(
-            arrowDimen,
-            height / 2 - arrowDimen,
-            3 * arrowDimen,
-            height / 2 + arrowDimen
-        )
-        canvas?.let {
-            caret?.draw(it)
-        }
+        rectangle_shape.setOnClickListener { listener.shapeSelected(Shape.RECTANGLE) }
+        circle_shape.setOnClickListener { listener.shapeSelected(Shape.CIRCLE) }
+        arrow_shape.setOnClickListener { listener.shapeSelected(Shape.ARROW) }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -97,23 +60,40 @@ class ToolOptions @JvmOverloads constructor(
     }
 
     /**
+     * Sets the tool size for tool options
+     *
+     * @param percentage the size to set the tool
+     */
+    fun setToolSize(percentage: Int) {
+        size_slider.progress = percentage
+    }
+
+    /**
      * Sets the drawer to show options based on the selected tool
      *
      * @param type the type of drawer format to display
      */
-    fun setDrawerType(type: ToolDrawerType) {
-        toolOptionsDrawerType = type
-        if (toolOptionsDrawerType == ToolDrawerType.SLIDER) {
-            shapeButtonHolder.visibility = View.GONE
-            shapeLabel.visibility = View.GONE
-            slider.visibility = View.VISIBLE
-            sizeLabel.visibility = View.VISIBLE
-        } else if (toolOptionsDrawerType == ToolDrawerType.SHAPES) {
-            slider.visibility = View.GONE
-            sizeLabel.visibility = View.GONE
-            shapeButtonHolder.visibility = View.VISIBLE
-            shapeLabel.visibility = View.VISIBLE
+    fun setDrawerType(tool: Tool) {
+        currentTool = tool
+        color_label.visibility = View.VISIBLE
+        color_picker.visibility = View.VISIBLE
+        if (currentTool == Tool.PEN || currentTool == Tool.TEXT) {
+            shape_button_holder.visibility = View.GONE
+            shape_label.visibility = View.GONE
+            size_slider.visibility = View.VISIBLE
+            size_label.visibility = View.VISIBLE
+        } else if (currentTool == Tool.SHAPE) {
+            size_slider.visibility = View.GONE
+            size_label.visibility = View.GONE
+            shape_button_holder.visibility = View.VISIBLE
+            shape_label.visibility = View.VISIBLE
         }
+        tool_preview.updateTool(tool)
+    }
+
+    fun setDrawerType(shape: Shape) {
+        setDrawerType(Tool.SHAPE)
+        tool_preview.updateShape(shape)
     }
 
     /**
@@ -137,11 +117,15 @@ class ToolOptions @JvmOverloads constructor(
      * Sets children of the tool options to be gone when off screen
      */
     fun setChildrenToVisible(isVisible: Boolean) {
-        colorPicker.visibility = if (isVisible) VISIBLE else GONE
-        slider.visibility = if (isVisible) VISIBLE else GONE
+        tool_preview.visibility = if (isVisible) VISIBLE else GONE
+        color_label.visibility = if (isVisible) VISIBLE else GONE
+        color_picker.visibility = if (isVisible) VISIBLE else GONE
+        if (currentTool == Tool.PEN || currentTool == Tool.TEXT) {
+            size_label.visibility = if (isVisible) VISIBLE else GONE
+            size_slider.visibility = if (isVisible) VISIBLE else GONE
+        } else {
+            shape_label.visibility = if (isVisible) VISIBLE else GONE
+            shape_button_holder.visibility = if (isVisible) VISIBLE else GONE
+        }
     }
-}
-
-enum class ToolDrawerType {
-    SLIDER, SHAPES
 }

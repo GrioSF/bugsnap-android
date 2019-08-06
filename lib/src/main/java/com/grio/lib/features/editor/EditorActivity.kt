@@ -23,8 +23,6 @@ import kotlinx.android.synthetic.main.a_editor.*
 import javax.inject.Inject
 
 const val TOOL_OPTIONS_DRAWER_MARGIN = 16
-const val TOOL_OPTIONS_DRAWER_ANIMATION_DURATION = 500L
-const val TOOL_OPTIONS_DECELERATE_FACTOR = 3f
 
 class EditorActivity : BaseActivity() {
 
@@ -33,7 +31,6 @@ class EditorActivity : BaseActivity() {
 
     private val collapsedToolOptions = ConstraintSet()
     private val expandedToolOptions = ConstraintSet()
-    private val toolOptionsTransition = ChangeBounds()
 
     private lateinit var viewModel: EditorViewModel
 
@@ -76,19 +73,19 @@ class EditorActivity : BaseActivity() {
                     screenAnnotator.currentTool = Tool.PEN
                     screenAnnotator.resetTextAnnotation()
                     viewModel.toolOptionsShown.value = true
-                    toolOptions.setDrawerType(ToolDrawerType.SLIDER)
+                    toolOptions.setDrawerType(Tool.PEN)
                 }
                 it.itemId == R.id.insertText -> {
                     screenAnnotator.currentTool = Tool.TEXT
                     screenAnnotator.resetTextAnnotation()
                     viewModel.toolOptionsShown.value = true
-                    toolOptions.setDrawerType(ToolDrawerType.SLIDER)
+                    toolOptions.setDrawerType(Tool.TEXT)
                 }
                 it.itemId == R.id.insertShape -> {
                     screenAnnotator.currentTool = Tool.SHAPE
                     screenAnnotator.resetTextAnnotation()
                     viewModel.toolOptionsShown.value = true
-                    toolOptions.setDrawerType(ToolDrawerType.SHAPES)
+                    toolOptions.setDrawerType(screenAnnotator.selectedShapeType)
                 }
                 it.itemId == R.id.delete -> {
                     if (screenAnnotator.attemptToSelectAnnotation)
@@ -116,9 +113,12 @@ class EditorActivity : BaseActivity() {
 
             override fun shapeSelected(shape: Shape) {
                 screenAnnotator.selectedShapeType = shape
+                toolOptions.setDrawerType(shape)
             }
-
         }
+
+        // Set initial tool size to 50%
+        toolOptions.setToolSize(50)
 
         // Confirmation button click listener
         confirmAnnotations.setOnClickListener {
@@ -135,16 +135,13 @@ class EditorActivity : BaseActivity() {
      * Shows and hides the tool options
      */
     private fun handleToolOptions(isShown: Boolean?) {
-        isShown?.let {
-            toolOptions.setChildrenToVisible(it)
-            for (child in toolOptions.children) {
-                child.animate().alpha(if (isShown) 1.0f else 0.0f)
+        isShown?.let { toolOptionsExpanded ->
+            toolOptions.setChildrenToVisible(toolOptionsExpanded)
+            if (toolOptionsExpanded) {
+                expandedToolOptions.applyTo(toolConstraintLayout)
+            } else {
+                collapsedToolOptions.applyTo(toolConstraintLayout)
             }
-
-//            TransitionManager.beginDelayedTransition(toolConstraintLayout, toolOptionsTransition)
-//            if (isShown) expandedToolOptions.applyTo(toolConstraintLayout) else collapsedToolOptions.applyTo(
-//                toolConstraintLayout
-//            )
         }
     }
 
@@ -159,8 +156,6 @@ class EditorActivity : BaseActivity() {
             ConstraintSet.PARENT_ID, ConstraintSet.START,
             TOOL_OPTIONS_DRAWER_MARGIN * resources.displayMetrics.density.toInt()
         )
-//        toolOptionsTransition.interpolator = DecelerateInterpolator(TOOL_OPTIONS_DECELERATE_FACTOR)
-//        toolOptionsTransition.duration = TOOL_OPTIONS_DRAWER_ANIMATION_DURATION
     }
 
     /**
