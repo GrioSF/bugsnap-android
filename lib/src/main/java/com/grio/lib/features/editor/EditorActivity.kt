@@ -6,11 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MenuItem
-import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
-import androidx.transition.ChangeBounds
-import androidx.transition.TransitionManager
 import com.google.gson.Gson
 import com.grio.lib.R
 import com.grio.lib.core.di.DaggerInjector

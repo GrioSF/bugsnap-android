@@ -58,9 +58,9 @@ class ToolPreview @JvmOverloads constructor(
             strokeWidth = 4f
         }
 
-        rectangleIcon!!.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP)
-        circleIcon!!.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP)
-        arrowIcon!!.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP)
+        rectangleIcon?.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP)
+        circleIcon?.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP)
+        arrowIcon?.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -86,33 +86,45 @@ class ToolPreview @JvmOverloads constructor(
                 )
             }
             Tool.SHAPE -> {
-                when (shape) {
-                    Shape.RECTANGLE -> {
-                        rectangleIcon!!.setBounds(10, 10, width - 10, height - 10)
-                        rectangleIcon!!.draw(canvas!!)
-                    }
-                    Shape.CIRCLE -> {
-                        circleIcon!!.setBounds(10, 10, width - 10, height - 10)
-                        circleIcon!!.draw(canvas!!)
-                    }
-                    Shape.ARROW -> {
-                        arrowIcon!!.setBounds(10, 10, width - 10, height - 10)
-                        arrowIcon!!.draw(canvas!!)
+                canvas?.let {
+                    when (shape) {
+                        Shape.RECTANGLE -> {
+                            rectangleIcon?.setBounds(10, 10, width - 10, height - 10)
+                            rectangleIcon?.draw(it)
+                        }
+                        Shape.CIRCLE -> {
+                            circleIcon?.setBounds(10, 10, width - 10, height - 10)
+                            circleIcon?.draw(it)
+                        }
+                        Shape.ARROW -> {
+                            arrowIcon?.setBounds(10, 10, width - 10, height - 10)
+                            arrowIcon?.draw(it)
+                        }
                     }
                 }
             }
         }
     }
 
+    /**
+     * Update the preview tool color
+     *
+     * @param color the color to change to
+     */
     fun updateColor(color: String) {
         paint.color = Color.parseColor(color)
         textBackgroundBrush.color = Color.parseColor(color)
-        rectangleIcon!!.setColorFilter(Color.parseColor(color), PorterDuff.Mode.SRC_ATOP)
-        circleIcon!!.setColorFilter(Color.parseColor(color), PorterDuff.Mode.SRC_ATOP)
-        arrowIcon!!.setColorFilter(Color.parseColor(color), PorterDuff.Mode.SRC_ATOP)
+        rectangleIcon?.setColorFilter(Color.parseColor(color), PorterDuff.Mode.SRC_ATOP)
+        circleIcon?.setColorFilter(Color.parseColor(color), PorterDuff.Mode.SRC_ATOP)
+        arrowIcon?.setColorFilter(Color.parseColor(color), PorterDuff.Mode.SRC_ATOP)
         invalidate()
     }
 
+    /**
+     * Update the preview tool size
+     *
+     * @param size the size to change to
+     */
     fun updateSize(size: Float) {
         this.size = size
         textBrush.textSize = size
@@ -120,6 +132,11 @@ class ToolPreview @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * Update the tool being shown in the preview with fade in/out animations
+     *
+     * @param tool the new tool to switch to
+     */
     fun updateTool(tool: Tool) {
         val disappearAnimation = ValueAnimator.ofFloat(VISIBLE_ALPHA, INVISIBLE_ALPHA)
         disappearAnimation.duration = PREVIEW_FADE_DURATION
@@ -146,6 +163,11 @@ class ToolPreview @JvmOverloads constructor(
         disappearAnimation.start()
     }
 
+    /**
+     * If shape selected, update the shape being shown int the preview with fade in/out animations
+     *
+     * @param selectedShape the new shape to show
+     */
     fun updateShape(selectedShape: Shape) {
         val disappearAnimation = ValueAnimator.ofFloat(VISIBLE_ALPHA, INVISIBLE_ALPHA)
         disappearAnimation.duration = PREVIEW_FADE_DURATION

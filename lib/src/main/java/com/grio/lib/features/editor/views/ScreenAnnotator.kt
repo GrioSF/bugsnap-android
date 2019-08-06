@@ -257,7 +257,7 @@ class ScreenAnnotator @JvmOverloads constructor(
         val newAnnotation = TextAnnotation(paintColor, strokeWidth, x, y)
         listener.beginDrawing()
         annotations.add(newAnnotation)
-        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY)
+        imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
         textToolState = TYPING
     }
 

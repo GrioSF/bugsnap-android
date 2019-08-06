@@ -71,7 +71,7 @@ class ToolOptions @JvmOverloads constructor(
     /**
      * Sets the drawer to show options based on the selected tool
      *
-     * @param type the type of drawer format to display
+     * @param tool the type of drawer format to display
      */
     fun setDrawerType(tool: Tool) {
         currentTool = tool
