@@ -1,4 +1,6 @@
-# Bugsnap
+<img src="https://grio.com/images/logo-small-54e7f941.svg" width=100/>
+
+# Bugsnap 
 [![CircleCI](https://circleci.com/gh/GrioSF/bugsnap-android/tree/master.svg?style=shield&circle-token=6dddb6e75b300271d4ea1a9aaf65f9cfe00348cc)](https://circleci.com/gh/GrioSF/bugsnap-android/tree/master)
 
 An Android Library enabling users to report bugs directly from their mobile device.
