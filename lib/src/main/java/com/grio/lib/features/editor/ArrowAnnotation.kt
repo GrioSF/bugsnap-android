@@ -87,6 +87,10 @@ data class ArrowAnnotation(
         return false
     }
 
+    override fun move(x: Float, y: Float) {
+        // do things
+    }
+
     override fun getRect(): RectF {
         return RectF(
             min(min(start.x - size, arrowLeftEnd.x - size), min(end.x - size, arrowRightEnd.x - size)),

@@ -79,67 +79,23 @@ class ScreenAnnotator @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        when (currentTool) {
-            Tool.PEN -> {
-                handlePenToolTouchEvent(event)
-            }
-            Tool.TEXT -> {
-                handleTextToolTouchEvent(event)
-            }
-            Tool.SHAPE -> {
-                handleShapeToolTouchEvent(event)
+        if (selectedAnnotation != null && event?.action == MotionEvent.ACTION_MOVE) {
+            selectedAnnotation?.move(event.x, event.y)
+        } else {
+            when (currentTool) {
+                Tool.PEN -> {
+                    handlePenToolTouchEvent(event)
+                }
+                Tool.TEXT -> {
+                    handleTextToolTouchEvent(event)
+                }
+                Tool.SHAPE -> {
+                    handleShapeToolTouchEvent(event)
+                }
             }
         }
         invalidate()
         return true
-    }
-
-    // Check for key events when typing into text box
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if ((!::lastClick.isInitialized || event !== lastClick) && textToolState == TYPING) {
-            when {
-                keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty() -> {
-                    textInput.delete(textInput.length - 1, textInput.length)
-                    (annotations.last() as TextAnnotation).text = textInput.toString()
-                }
-                keyCode == KeyEvent.KEYCODE_ENTER -> {
-                    resetTextAnnotation()
-                    imm.hideSoftInputFromWindow(windowToken, 0)
-                }
-                keyCode == KeyEvent.KEYCODE_BACK -> {
-                    resetTextAnnotation()
-                }
-                else -> {
-                    if (event != null) {
-                        textInput.append(event.unicodeChar.toChar())
-                    }
-                    (annotations.last() as TextAnnotation).text = textInput.toString()
-                }
-            }
-            invalidate()
-
-        }
-        if (event != null) {
-            lastClick = event
-        }
-        return true
-    }
-
-    // Handle hardware back press
-    override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
-        if (event?.action == KeyEvent.ACTION_UP && event.keyCode == KeyEvent.KEYCODE_BACK) {
-            resetTextAnnotation()
-            invalidate()
-            return super.onKeyPreIme(keyCode, event)
-        }
-        return super.onKeyPreIme(keyCode, event)
-    }
-
-    // Setup view to receive keyboard key events
-    override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
-        val fic = BaseInputConnection(this, false)
-        outAttrs?.inputType = InputType.TYPE_NULL
-        return fic
     }
 
     /**
@@ -173,7 +129,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param event the touch event information to be processed
      */
     private fun handleTextToolTouchEvent(event: MotionEvent?) {
-        if (event?.action == MotionEvent.ACTION_UP) {
+        if (event?.action == MotionEvent.ACTION_DOWN) {
             if (textToolState != NONE) resetTextAnnotation()
             if (!annotationWasSelected(event.x, event.y)) {
                 textToolState = INITIALIZING
@@ -347,6 +303,54 @@ class ScreenAnnotator @JvmOverloads constructor(
     interface Listener {
         // Fired when user begins to draw on screen
         fun beginDrawing()
+    }
+
+    // Check for key events when typing into text box
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if ((!::lastClick.isInitialized || event !== lastClick) && textToolState == TYPING) {
+            when {
+                keyCode == KeyEvent.KEYCODE_DEL && textInput.isNotEmpty() -> {
+                    textInput.delete(textInput.length - 1, textInput.length)
+                    (annotations.last() as TextAnnotation).text = textInput.toString()
+                }
+                keyCode == KeyEvent.KEYCODE_ENTER -> {
+                    resetTextAnnotation()
+                    imm.hideSoftInputFromWindow(windowToken, 0)
+                }
+                keyCode == KeyEvent.KEYCODE_BACK -> {
+                    resetTextAnnotation()
+                }
+                else -> {
+                    if (event != null) {
+                        textInput.append(event.unicodeChar.toChar())
+                    }
+                    (annotations.last() as TextAnnotation).text = textInput.toString()
+                }
+            }
+            invalidate()
+
+        }
+        if (event != null) {
+            lastClick = event
+        }
+        return true
+    }
+
+    // Handle hardware back press
+    override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event?.action == KeyEvent.ACTION_UP && event.keyCode == KeyEvent.KEYCODE_BACK) {
+            resetTextAnnotation()
+            invalidate()
+            return super.onKeyPreIme(keyCode, event)
+        }
+        return super.onKeyPreIme(keyCode, event)
+    }
+
+    // Setup view to receive keyboard key events
+    override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
+        val fic = BaseInputConnection(this, false)
+        outAttrs?.inputType = InputType.TYPE_NULL
+        return fic
     }
 }
 

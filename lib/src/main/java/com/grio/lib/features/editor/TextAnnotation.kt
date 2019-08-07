@@ -10,8 +10,8 @@ data class TextAnnotation(
     override var size: Float,
     override var defaultBrush: Paint,
     var text: String,
-    val x: Float,
-    val y: Float,
+    var x: Float,
+    var y: Float,
     var textBackgroundBrush: Paint,
     private var textBrush: Paint
 ) : BaseAnnotation {
@@ -60,6 +60,11 @@ data class TextAnnotation(
             return true
         }
         return false
+    }
+
+    override fun move(x: Float, y: Float) {
+        this.x = x
+        this.y = y
     }
 
     override fun getRect(): RectF {

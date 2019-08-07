@@ -40,6 +40,10 @@ data class RectangleAnnotation(
         end.y = y
     }
 
+    override fun move(x: Float, y: Float) {
+        // do things
+    }
+
     override fun wasSelected(x: Float, y: Float): Boolean {
         return when {
             // check left

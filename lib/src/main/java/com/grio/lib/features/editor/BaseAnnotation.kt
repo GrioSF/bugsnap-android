@@ -17,4 +17,7 @@ interface BaseAnnotation {
 
     // Returns the rectangle bounding the annotation
     fun getRect(): RectF
+
+    // Moves the annotation on drag
+    fun move(x: Float, y: Float)
 }

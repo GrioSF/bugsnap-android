@@ -53,6 +53,10 @@ data class CircleAnnotation(
         return false
     }
 
+    override fun move(x: Float, y: Float) {
+        // do things
+    }
+
     override fun getRect(): RectF {
         return RectF(
             center.x - radius - size,
