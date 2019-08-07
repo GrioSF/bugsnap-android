@@ -10,6 +10,12 @@ import android.util.DisplayMetrics
 class DeviceIdentifier {
 
     companion object {
+
+        /**
+         * Approx. bytes in one Mb.
+         */
+        private const val BYTES_IN_MB = 1048576L
+
         @JvmStatic
         fun getDeviceInformation(activity: Activity): DeviceInformation {
 
@@ -22,8 +28,8 @@ class DeviceIdentifier {
 
             // Available heap.
             val runtime = Runtime.getRuntime()
-            val usedMemInMB = (runtime.totalMemory() - runtime.freeMemory()) / 1048576L
-            val maxHeapSizeInMB = runtime.maxMemory() / 1048576L
+            val usedMemInMB = (runtime.totalMemory() - runtime.freeMemory()) / BYTES_IN_MB
+            val maxHeapSizeInMB = runtime.maxMemory() / BYTES_IN_MB
             val availHeapSizeInMB = maxHeapSizeInMB - usedMemInMB
 
             // Battery
