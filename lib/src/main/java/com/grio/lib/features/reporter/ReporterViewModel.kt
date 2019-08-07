@@ -3,6 +3,7 @@ package com.grio.lib.features.reporter
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.grio.lib.core.platform.BaseViewModel
+import com.grio.lib.features.DeviceInformation
 import com.grio.lib.features.editor.cases.AddAttachment
 import com.grio.lib.features.editor.cases.CreateIssue
 import okhttp3.MultipartBody
@@ -25,12 +26,16 @@ class ReporterViewModel
                           description: String = "Default Description.",
                           file: File,
                           logString: String = "",
-                          isVideo: Boolean = false) {
+                          isVideo: Boolean = false,
+                          deviceInformation: DeviceInformation) {
         // Start loading
         isLoading.value = true
 
+        // Prefix description with device information.
+        val descriptionWithDeviceInfo = deviceInformation.format().plus("\n\n").plus(description)
+
         // Create issue.
-        createIssue(CreateIssue.Params(summary, description)) { it.either({
+        createIssue(CreateIssue.Params(summary, descriptionWithDeviceInfo)) { it.either({
             isLoading.value = false
             Log.e("BugSnap", "Failed to create issue: $it")
 

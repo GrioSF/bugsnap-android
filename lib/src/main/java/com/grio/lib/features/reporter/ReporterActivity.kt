@@ -12,6 +12,7 @@ import com.grio.lib.core.di.DaggerInjector
 import com.grio.lib.core.extension.observe
 import com.grio.lib.core.extension.viewModels
 import com.grio.lib.core.platform.BaseActivity
+import com.grio.lib.features.DeviceIdentifier
 import com.grio.lib.features.editor.*
 import com.grio.lib.features.LogSnapshotManager
 import kotlinx.android.synthetic.main.a_reporter.*
@@ -110,7 +111,8 @@ class ReporterActivity :  BaseActivity() {
                     description = description,
                     file = file,
                     logString = viewModel.log,
-                    isVideo = this.isVideo)
+                    isVideo = this.isVideo,
+                    deviceInformation = DeviceIdentifier.getDeviceInformation(this))
             }
 
             return true
