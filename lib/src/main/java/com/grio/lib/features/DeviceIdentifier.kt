@@ -96,7 +96,6 @@ data class DeviceInformation(
                 "Model: $model\n" +
                 "Board: $board\n" +
                 "Hardware: $hardware\n" +
-                "Serial: $serial\n" +
                 "Resolution: $screenResolution\n" +
                 "Android Version: Android $androidVersionRelease (API $androidVersion)\n" +
                 "Product: $product\n" +
