@@ -14,4 +14,10 @@
     <string name="log_attached">Log attached</string>
     <string name="record_api_level_too_low">You must be running Android M to use screen recording.</string>
     <string name="error_device_storage">Unable to write to device storage.</string>
+    <string name="color">Color</string>
+    <string name="tool_options_caret_description">Tool options opening caret</string>
+    <string name="size">Size</string>
+    <string name="shape">Shape</string>
+    <string name="rectangle_tool_description">Rectangle tool</string>
+    <string name="circle_tool_description">Circle tool</string>
 </resources>

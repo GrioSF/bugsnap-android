@@ -41,7 +41,7 @@ class ScreenAnnotator @JvmOverloads constructor(
     private var selectedAnnotation: BaseAnnotation? = null
     var selectedShapeType = Shape.RECTANGLE
     var attemptToSelectAnnotation = false
-    var currentTool = Tool.NONE
+    var currentTool = Tool.PEN
 
     lateinit var listener: Listener
     lateinit var originalScreenshot: Bitmap
@@ -88,9 +88,6 @@ class ScreenAnnotator @JvmOverloads constructor(
             }
             Tool.SHAPE -> {
                 handleShapeToolTouchEvent(event)
-            }
-            Tool.NONE -> {
-                // TODO: To be used for dragging
             }
         }
         invalidate()
@@ -260,7 +257,7 @@ class ScreenAnnotator @JvmOverloads constructor(
         val newAnnotation = TextAnnotation(paintColor, strokeWidth, x, y)
         listener.beginDrawing()
         annotations.add(newAnnotation)
-        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY)
+        imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
         textToolState = TYPING
     }
 
@@ -354,7 +351,7 @@ class ScreenAnnotator @JvmOverloads constructor(
 }
 
 enum class Tool {
-    PEN, TEXT, SHAPE, NONE
+    PEN, TEXT, SHAPE
 }
 
 enum class Shape {
