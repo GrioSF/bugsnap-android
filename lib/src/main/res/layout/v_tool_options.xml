@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:background="@drawable/background_tool_options"
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:animateLayoutChanges="true">
 
     <ImageView
@@ -14,7 +14,8 @@
             android:src="@drawable/caret_icon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/tool_options_caret_description"/>
 
     <com.grio.lib.features.editor.views.ToolPreview
             android:id="@+id/tool_preview"
@@ -28,52 +29,52 @@
             android:id="@+id/color_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:text="Color"
+            android:textColor="@color/tool_options_text_color"
+            android:text="@string/color"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="@id/color_picker"
             app:layout_constraintBottom_toBottomOf="@id/color_picker"
-            app:layout_constraintStart_toEndOf="@id/caret"
-            android:visibility="gone"/>
+            app:layout_constraintStart_toEndOf="@id/caret"/>
 
     <com.grio.lib.features.editor.views.ColorPicker
             android:id="@+id/color_picker"
             android:layout_width="0dp"
             android:layout_height="50dp"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@id/color_label"
             app:layout_constraintEnd_toStartOf="@id/tool_preview"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
             android:id="@+id/size_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:text="Size"
+            android:textColor="@color/tool_options_text_color"
+            android:text="@string/size"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="@id/size_slider"
             app:layout_constraintBottom_toBottomOf="@id/size_slider"
-            app:layout_constraintStart_toEndOf="@id/caret"
-            android:visibility="gone"/>
+            app:layout_constraintStart_toEndOf="@id/caret"/>
 
     <SeekBar
             android:id="@+id/size_slider"
             android:layout_width="0dp"
             android:layout_height="50dp"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/color_picker"
             app:layout_constraintEnd_toStartOf="@id/tool_preview"
-            app:layout_constraintStart_toEndOf="@id/size_label"
-            android:visibility="gone"/>
+            app:layout_constraintStart_toEndOf="@id/size_label"/>
 
     <TextView
             android:id="@+id/shape_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#fff"
-            android:text="Shape"
+            android:textColor="@color/tool_options_text_color"
+            android:text="@string/shape"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="@id/shape_button_holder"
             app:layout_constraintBottom_toBottomOf="@id/shape_button_holder"
-            app:layout_constraintStart_toEndOf="@id/caret"
-            android:visibility="gone"/>
+            app:layout_constraintStart_toEndOf="@id/caret"/>
 
     <LinearLayout
             android:id="@+id/shape_button_holder"
@@ -82,10 +83,10 @@
             android:orientation="horizontal"
             android:weightSum="3"
             android:gravity="center"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/color_picker"
             app:layout_constraintEnd_toStartOf="@id/tool_preview"
-            app:layout_constraintStart_toEndOf="@id/shape_label"
-            android:visibility="gone">
+            app:layout_constraintStart_toEndOf="@id/shape_label">
 
         <ImageView
                 android:id="@+id/rectangle_shape"
@@ -94,7 +95,8 @@
                 android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
-                android:src="@drawable/rectangle_shape_tool_icon"/>
+                android:src="@drawable/rectangle_shape_tool_icon"
+                android:contentDescription="@string/rectangle_tool_description"/>
 
         <ImageView
                 android:id="@+id/circle_shape"
@@ -103,7 +105,8 @@
                 android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
-                android:src="@drawable/circle_shape_tool_icon"/>
+                android:src="@drawable/circle_shape_tool_icon"
+                android:contentDescription="@string/circle_tool_description"/>
 
         <ImageView
                 android:id="@+id/arrow_shape"
