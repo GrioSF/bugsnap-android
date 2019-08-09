@@ -265,7 +265,6 @@ class ScreenAnnotator @JvmOverloads constructor(
      * Resets the text annotation state to allow for
      * multiple tool usages
      *
-     * TODO: remove this function and control state in a way that
      * textToolState shouldn't be manually set every time
      * a tool is changed ot the confirmation button is pressed
      */
