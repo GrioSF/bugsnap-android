@@ -1,6 +1,7 @@
 package com.grio.lib.features.editor
 
 import android.graphics.*
+import com.grio.lib.core.extension.updateWithDelta
 import com.grio.lib.features.editor.ShapeAnnotation.Companion.CLICKABLE_AREA_ALLOWANCE
 import kotlin.math.max
 import kotlin.math.min
@@ -9,6 +10,7 @@ data class ArrowAnnotation(
     override var color: String,
     override var size: Float,
     override var defaultBrush: Paint,
+    override var lastClick: PointF?,
     var start: PointF,
     var end: PointF,
     var arrowLeftEnd: PointF,
@@ -27,7 +29,7 @@ data class ArrowAnnotation(
     }
 
     constructor(color: String, x: Float, y: Float) :
-            this(color, 15f, Paint(), PointF(x, y), PointF(x, y), PointF(x, y), PointF(x, y))
+            this(color, 15f, Paint(), null, PointF(x, y), PointF(x, y), PointF(x, y), PointF(x, y))
 
     override fun drawToCanvas(canvas: Canvas?) {
         canvas?.drawLine(start.x, start.y, end.x, end.y, defaultBrush)
@@ -85,6 +87,20 @@ data class ArrowAnnotation(
             return true
         }
         return false
+    }
+
+    override fun move(x: Float, y: Float) {
+        lastClick?.let {
+            val dx = x - it.x
+            val dy = y - it.y
+            start.updateWithDelta(dx, dy)
+            end.updateWithDelta(dx, dy)
+            arrowLeftEnd.updateWithDelta(dx, dy)
+            arrowRightEnd.updateWithDelta(dx, dy)
+            it.set(x, y)
+        } ?: run {
+            lastClick = PointF(x, y)
+        }
     }
 
     override fun getRect(): RectF {

@@ -47,6 +47,8 @@ class ScreenAnnotator @JvmOverloads constructor(
     lateinit var originalScreenshot: Bitmap
     lateinit var lastClick: KeyEvent
 
+    var dragging = false
+
     init {
         isFocusableInTouchMode = true
         isFocusable = true
@@ -79,6 +81,11 @@ class ScreenAnnotator @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+
+        if (dragging) {
+            selectedAnnotation?.move(event!!.x, event.y)
+        }
+
         when (currentTool) {
             Tool.PEN -> {
                 handlePenToolTouchEvent(event)
@@ -90,8 +97,255 @@ class ScreenAnnotator @JvmOverloads constructor(
                 handleShapeToolTouchEvent(event)
             }
         }
+
         invalidate()
         return true
+    }
+
+    /**
+     * Handles touch actions associated with pen tool
+     *
+     * @param event the touch event information to be processed
+     */
+    private fun handlePenToolTouchEvent(event: MotionEvent?) {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                if (attemptToSelectAnnotation) {
+                    selectedAnnotation?.getRect()?.let { boundingBox ->
+                        if (event.x > boundingBox.left &&
+                            event.x < boundingBox.right &&
+                            event.y > boundingBox.top &&
+                            event.y < boundingBox.bottom
+                        ) {
+                            dragging = true
+                        }
+                    }
+                }
+                attemptToSelectAnnotation = true
+                startPenDrawing(event.x, event.y)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!dragging) {
+                    recordPenMovement(event.x, event.y)
+                    attemptToSelectAnnotation = false
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if (!dragging) {
+                    if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
+                        annotations.removeAt(annotations.size - 1)
+                    } else {
+                        stopPenRecording()
+                    }
+                }
+                dragging = false
+                selectedAnnotation?.resetLastClick()
+            }
+        }
+    }
+
+    /**
+     * Handles touch actions associated with text tool
+     *
+     * @param event the touch event information to be processed
+     */
+    private fun handleTextToolTouchEvent(event: MotionEvent?) {
+        when {
+            event?.action == MotionEvent.ACTION_DOWN -> {
+                if (textToolState != NONE) resetTextAnnotation()
+                if (!annotationWasSelected(event.x, event.y)) {
+                    textToolState = INITIALIZING
+                    initializeTextAnnotation(event.x, event.y)
+                } else {
+                    attemptToSelectAnnotation = true
+                }
+                invalidate()
+            }
+            event?.action == MotionEvent.ACTION_MOVE -> dragging = true
+            event?.action == MotionEvent.ACTION_UP -> {
+                dragging = false
+                selectedAnnotation?.resetLastClick()
+            }
+        }
+    }
+
+    /**
+     * Handles touch actions associated with shape tool
+     *
+     * @param event the touch event information to be processed
+     */
+    private fun handleShapeToolTouchEvent(event: MotionEvent?) {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                if (attemptToSelectAnnotation) {
+                    selectedAnnotation?.getRect()?.let { boundingBox ->
+                        if (event.x > boundingBox.left &&
+                            event.x < boundingBox.right &&
+                            event.y > boundingBox.top &&
+                            event.y < boundingBox.bottom
+                        ) {
+                            dragging = true
+                        }
+                    }
+                }
+                attemptToSelectAnnotation = true
+                startShapeDrawing(event.x, event.y)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!dragging) {
+                    attemptToSelectAnnotation = false
+                    recordShapeMovement(event.x, event.y)
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if (!dragging) {
+                    if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
+                        annotations.removeAt(annotations.size - 1)
+                    }
+                }
+                dragging = false
+                selectedAnnotation?.resetLastClick()
+            }
+        }
+    }
+
+    /**
+     * Record when user touches the screen with the Pen tool
+     *
+     * @param x the x coordinate of the touch
+     * @param y the y coordinate of the touch
+     */
+    private fun startPenDrawing(x: Float, y: Float) {
+        listener.beginDrawing()
+        val newAnnotation = PenAnnotation(paintColor, strokeWidth, x, y)
+        newAnnotation.drawnPath.moveTo(x, y)
+        annotations.add(newAnnotation)
+    }
+
+    /**
+     * Record movement of Pen tool and update annotation model
+     *
+     * @param x the x coordinate of the touch
+     * @param y the y coordinate of the touch
+     */
+    private fun recordPenMovement(x: Float, y: Float) {
+        val annotation = (annotations.last() as PenAnnotation)
+        (annotations.last() as PenAnnotation).drawnPath.quadTo(
+            annotation.end.x,
+            annotation.end.y,
+            (x + annotation.end.x) / 2,
+            (y + annotation.end.y) / 2
+        )
+        (annotations.last() as PenAnnotation).updateBounds(x, y)
+    }
+
+    /**
+     * User stopped using Pen tool. Stop recording.
+     */
+    private fun stopPenRecording() {
+        val annotation = (annotations.last() as PenAnnotation)
+        (annotations.last() as PenAnnotation).drawnPath.lineTo(annotation.end.x, annotation.end.y)
+    }
+
+    /**
+     * Create text annotation and toggle keyboard input
+     *
+     * @param x the x coordinate of the touch
+     * @param y the y coordinate of the touch
+     */
+    private fun initializeTextAnnotation(x: Float, y: Float) {
+        val newAnnotation = TextAnnotation(paintColor, strokeWidth, x, y)
+        listener.beginDrawing()
+        annotations.add(newAnnotation)
+        imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+        textToolState = TYPING
+    }
+
+    /**
+     * Resets the text annotation state to allow for
+     * multiple tool usages
+     *
+     * textToolState shouldn't be manually set every time
+     * a tool is changed ot the confirmation button is pressed
+     */
+    fun resetTextAnnotation() {
+        textToolState = NONE
+        textInput.clear()
+    }
+
+    /**
+     * Start drawing a shape onto the screen
+     *
+     * @param x the x coordinate of the touch
+     * @param y the y coordinate of the touch
+     */
+    private fun startShapeDrawing(x: Float, y: Float) {
+        val newAnnotation = ShapeAnnotation.createShape(paintColor, strokeWidth, x, y, selectedShapeType)
+        listener.beginDrawing()
+        annotations.add(newAnnotation)
+    }
+
+    /**
+     * Record user making shape larger and smaller
+     *
+     * @param x the x coordinate of the touch
+     * @param y the y coordinate of the touch
+     */
+    private fun recordShapeMovement(x: Float, y: Float) {
+        (annotations.last() as ShapeAnnotation).updateShape(x, y)
+    }
+
+    /**
+     * Check if any annotations were selected
+     *
+     * @param x the x coordinate of the touch
+     * @param y the y coordinate of the touch
+     *
+     * @return true if annotation was selected, false otherwise
+     */
+    private fun annotationWasSelected(x: Float, y: Float): Boolean {
+        annotations.forEach { annotation ->
+            if (annotation.wasSelected(x, y)) {
+                selectedAnnotation = annotation
+                return true
+            }
+        }
+        selectedAnnotation = null
+        attemptToSelectAnnotation = false
+        invalidate()
+        return false
+    }
+
+    /**
+     * Remove the currently selected annotation
+     */
+    fun removeSelectedAnnotation() {
+        annotations.remove(selectedAnnotation)
+        invalidate()
+    }
+
+    /**
+     * Removes the last line drawn
+     */
+    fun undo() {
+        if (annotations.isNotEmpty())
+            annotations.remove(annotations.last())
+        invalidate()
+    }
+
+    /**
+     * Retrieve the current view of the annotations made
+     */
+    fun getAnnotatedScreenshot(): Bitmap {
+        return this.screenshot()
+    }
+
+    /**
+     * Listens for Annotation Events
+     */
+    interface Listener {
+        // Fired when user begins to draw on screen
+        fun beginDrawing()
     }
 
     // Check for key events when typing into text box
@@ -140,213 +394,6 @@ class ScreenAnnotator @JvmOverloads constructor(
         val fic = BaseInputConnection(this, false)
         outAttrs?.inputType = InputType.TYPE_NULL
         return fic
-    }
-
-    /**
-     * Handles touch actions associated with pen tool
-     *
-     * @param event the touch event information to be processed
-     */
-    private fun handlePenToolTouchEvent(event: MotionEvent?) {
-        when (event?.action) {
-            MotionEvent.ACTION_DOWN -> {
-                attemptToSelectAnnotation = true
-                startPenDrawing(event.x, event.y)
-            }
-            MotionEvent.ACTION_MOVE -> {
-                attemptToSelectAnnotation = false
-                recordPenMovement(event.x, event.y)
-            }
-            MotionEvent.ACTION_UP -> {
-                if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
-                    annotations.removeAt(annotations.size - 1)
-                } else {
-                    stopPenRecording()
-                }
-            }
-        }
-    }
-
-    /**
-     * Handles touch actions associated with text tool
-     *
-     * @param event the touch event information to be processed
-     */
-    private fun handleTextToolTouchEvent(event: MotionEvent?) {
-        if (event?.action == MotionEvent.ACTION_UP) {
-            if (textToolState != NONE) resetTextAnnotation()
-            if (!annotationWasSelected(event.x, event.y)) {
-                textToolState = INITIALIZING
-                initializeTextAnnotation(event.x, event.y)
-            } else {
-                attemptToSelectAnnotation = true
-            }
-            invalidate()
-        }
-    }
-
-    /**
-     * Handles touch actions associated with shape tool
-     *
-     * @param event the touch event information to be processed
-     */
-    private fun handleShapeToolTouchEvent(event: MotionEvent?) {
-        when (event?.action) {
-            MotionEvent.ACTION_DOWN -> {
-                attemptToSelectAnnotation = true
-                startShapeDrawing(event.x, event.y)
-            }
-            MotionEvent.ACTION_MOVE -> {
-                attemptToSelectAnnotation = false
-                recordShapeMovement(event.x, event.y)
-            }
-            MotionEvent.ACTION_UP -> {
-                if (attemptToSelectAnnotation) {
-                    annotations.removeAt(annotations.size - 1)
-                    annotationWasSelected(event.x, event.y)
-                }
-            }
-        }
-    }
-
-    /**
-     * Record when user touches the screen with the Pen tool
-     *
-     * @param x the x coordinate of the touch
-     * @param y the y coordinate of the touch
-     */
-    private fun startPenDrawing(x: Float, y: Float) {
-        listener.beginDrawing()
-        val newAnnotation = PenAnnotation(paintColor, strokeWidth, x, y)
-        newAnnotation.drawnPath.moveTo(x, y)
-        annotations.add(newAnnotation)
-    }
-
-    /**
-     * Record movement of Pen tool and update annotation model
-     *
-     * @param x the x coordinate of the touch
-     * @param y the y coordinate of the touch
-     */
-    private fun recordPenMovement(x: Float, y: Float) {
-        val annotation = (annotations.last() as PenAnnotation)
-        (annotations.last() as PenAnnotation).drawnPath.quadTo(
-            annotation.endX,
-            annotation.endY,
-            (x + annotation.endX) / 2,
-            (y + annotation.endY) / 2
-        )
-        (annotations.last() as PenAnnotation).updateBounds(x, y)
-    }
-
-    /**
-     * User stopped using Pen tool. Stop recording.
-     */
-    private fun stopPenRecording() {
-        val annotation = (annotations.last() as PenAnnotation)
-        (annotations.last() as PenAnnotation).drawnPath.lineTo(annotation.endX, annotation.endY)
-    }
-
-    /**
-     * Create text annotation and toggle keyboard input
-     *
-     * @param x the x coordinate of the touch
-     * @param y the y coordinate of the touch
-     */
-    private fun initializeTextAnnotation(x: Float, y: Float) {
-        val newAnnotation = TextAnnotation(paintColor, strokeWidth, x, y)
-        listener.beginDrawing()
-        annotations.add(newAnnotation)
-        imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-        textToolState = TYPING
-    }
-
-    /**
-     * Resets the text annotation state to allow for
-     * multiple tool usages
-     *
-     * TODO: remove this function and control state in a way that
-     * textToolState shouldn't be manually set every time
-     * a tool is changed ot the confirmation button is pressed
-     */
-    fun resetTextAnnotation() {
-        textToolState = NONE
-        textInput.clear()
-    }
-
-    /**
-     * Start drawing a shape onto the screen
-     *
-     * @param x the x coordinate of the touch
-     * @param y the y coordinate of the touch
-     */
-    private fun startShapeDrawing(x: Float, y: Float) {
-        val newAnnotation = ShapeAnnotation.createShape(paintColor, strokeWidth, x, y, selectedShapeType)
-        listener.beginDrawing()
-        annotations.add(newAnnotation)
-    }
-
-    /**
-     * Record user making shape larger and smaller
-     *
-     * @param x the x coordinate of the touch
-     * @param y the y coordinate of the touch
-     */
-    private fun recordShapeMovement(x: Float, y: Float) {
-        (annotations.last() as ShapeAnnotation).updateShape(x, y)
-    }
-
-    /**
-     * Check if any annotations were selected
-     *
-     * @param x the x coordinate of the touch
-     * @param y the y coordinate of the touch
-     *
-     * @return true if annotation was selected, false otherwise
-     */
-    private fun annotationWasSelected(x: Float, y: Float): Boolean {
-        selectedAnnotation = null
-        annotations.forEach { annotation ->
-            if (annotation.wasSelected(x, y)) {
-                selectedAnnotation = annotation
-                return true
-            }
-        }
-        if (selectedAnnotation == null) attemptToSelectAnnotation = false
-        invalidate()
-        return false
-    }
-
-    /**
-     * Remove the currently selected annotation
-     */
-    fun removeSelectedAnnotation() {
-        annotations.remove(selectedAnnotation)
-        invalidate()
-    }
-
-    /**
-     * Removes the last line drawn
-     */
-    fun undo() {
-        if (annotations.isNotEmpty())
-            annotations.remove(annotations.last())
-        invalidate()
-    }
-
-    /**
-     * Retrieve the current view of the annotations made
-     */
-    fun getAnnotatedScreenshot(): Bitmap {
-        return this.screenshot()
-    }
-
-    /**
-     * Listens for Annotation Events
-     */
-    interface Listener {
-        // Fired when user begins to draw on screen
-        fun beginDrawing()
     }
 }
 
