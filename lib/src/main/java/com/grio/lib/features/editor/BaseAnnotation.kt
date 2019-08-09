@@ -24,5 +24,7 @@ interface BaseAnnotation {
     fun move(x: Float, y: Float)
 
     // Reset last click when dragging ends
-    fun resetLastClick() { lastClick = null }
+    fun resetLastClick() {
+        lastClick = null
+    }
 }

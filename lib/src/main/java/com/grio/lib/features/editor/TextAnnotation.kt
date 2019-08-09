@@ -2,6 +2,7 @@ package com.grio.lib.features.editor
 
 import android.graphics.*
 import android.util.Log
+import com.grio.lib.core.extension.updateWithDelta
 
 data class TextAnnotation(
     override var color: String,
@@ -9,8 +10,7 @@ data class TextAnnotation(
     override var defaultBrush: Paint,
     override var lastClick: PointF?,
     var text: String,
-    var x: Float,
-    var y: Float,
+    var center: PointF,
     var textBackgroundBrush: Paint,
     private var textBrush: Paint
 ) : BaseAnnotation {
@@ -34,14 +34,14 @@ data class TextAnnotation(
     }
 
     constructor(color: String, size: Float, x: Float, y: Float) :
-            this(color, size, Paint(), null, "", x, y, Paint(), Paint())
+            this(color, size, Paint(), null, "", PointF(x, y), Paint(), Paint())
 
     override fun drawToCanvas(canvas: Canvas?) {
         canvas?.drawRect(getRect(), textBackgroundBrush)
         canvas?.drawText(
             text,
-            x - textBrush.measureText(text) / 2,
-            y - size / 2,
+            center.x - textBrush.measureText(text) / 2,
+            center.y - size / 2,
             textBrush
         )
     }
@@ -51,10 +51,10 @@ data class TextAnnotation(
         paint.textSize = size
         val textWidth = paint.measureText(text)
 
-        if (x > (this.x - textWidth / 2 - (size / 2)) &&
-            x < (this.x + textWidth / 2 + (size / 2)) &&
-            y > (this.y - (size / 2) - size) &&
-            y < this.y + size / 2
+        if (x > (center.x - textWidth / 2 - (size / 2)) &&
+            x < (center.x + textWidth / 2 + (size / 2)) &&
+            y > (center.y - (size / 2) - size) &&
+            y < center.y + size / 2
         ) {
             Log.wtf("WAS_SELECTED", "True")
             return true
@@ -67,10 +67,8 @@ data class TextAnnotation(
         lastClick?.let {
             val dx = x - it.x
             val dy = y - it.y
-            this.x += dx
-            this.y += dy
-            it.x = x
-            it.y = y
+            center.updateWithDelta(dx, dy)
+            it.set(x, y)
         } ?: run {
             lastClick = PointF(x, y)
         }
@@ -82,10 +80,10 @@ data class TextAnnotation(
         val textWidth = paint.measureText(text)
 
         return RectF(
-            x - textWidth / 2 - size / 2,
-            y - size / 2 - size,
-            x + textWidth / 2 + size / 2,
-            y
+            center.x - textWidth / 2 - size / 2,
+            center.y - size / 2 - size,
+            center.x + textWidth / 2 + size / 2,
+            center.y
         )
     }
 }

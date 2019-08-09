@@ -1,6 +1,7 @@
 package com.grio.lib.features.editor
 
 import android.graphics.*
+import com.grio.lib.core.extension.updateWithDelta
 import com.grio.lib.features.editor.ShapeAnnotation.Companion.CLICKABLE_AREA_ALLOWANCE
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -28,7 +29,7 @@ data class CircleAnnotation(
         }
     }
 
-    constructor(color: String, x: Float, y: Float): this(color, 15f, Paint(), null, PointF(x, y), 0f)
+    constructor(color: String, x: Float, y: Float) : this(color, 15f, Paint(), null, PointF(x, y), 0f)
 
     override fun drawToCanvas(canvas: Canvas?) {
         canvas?.drawCircle(center.x, center.y, radius, defaultBrush)
@@ -49,7 +50,8 @@ data class CircleAnnotation(
         if (x > closestX - CLICKABLE_AREA_ALLOWANCE &&
             x < closestX + CLICKABLE_AREA_ALLOWANCE &&
             y > closestY - CLICKABLE_AREA_ALLOWANCE &&
-            y < closestY + CLICKABLE_AREA_ALLOWANCE)
+            y < closestY + CLICKABLE_AREA_ALLOWANCE
+        )
             return true
         return false
     }
@@ -58,10 +60,8 @@ data class CircleAnnotation(
         lastClick?.let {
             val dx = x - it.x
             val dy = y - it.y
-            center.x += dx
-            center.y += dy
-            it.x = x
-            it.y = y
+            center.updateWithDelta(dx, dy)
+            it.set(x, y)
         } ?: run {
             lastClick = PointF(x, y)
         }

@@ -231,10 +231,10 @@ class ScreenAnnotator @JvmOverloads constructor(
     private fun recordPenMovement(x: Float, y: Float) {
         val annotation = (annotations.last() as PenAnnotation)
         (annotations.last() as PenAnnotation).drawnPath.quadTo(
-            annotation.endX,
-            annotation.endY,
-            (x + annotation.endX) / 2,
-            (y + annotation.endY) / 2
+            annotation.end.x,
+            annotation.end.y,
+            (x + annotation.end.x) / 2,
+            (y + annotation.end.y) / 2
         )
         (annotations.last() as PenAnnotation).updateBounds(x, y)
     }
@@ -244,7 +244,7 @@ class ScreenAnnotator @JvmOverloads constructor(
      */
     private fun stopPenRecording() {
         val annotation = (annotations.last() as PenAnnotation)
-        (annotations.last() as PenAnnotation).drawnPath.lineTo(annotation.endX, annotation.endY)
+        (annotations.last() as PenAnnotation).drawnPath.lineTo(annotation.end.x, annotation.end.y)
     }
 
     /**
