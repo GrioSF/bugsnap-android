@@ -47,6 +47,8 @@ class ScreenAnnotator @JvmOverloads constructor(
     lateinit var originalScreenshot: Bitmap
     lateinit var lastClick: KeyEvent
 
+    var dragging = false
+
     init {
         isFocusableInTouchMode = true
         isFocusable = true
@@ -79,21 +81,23 @@ class ScreenAnnotator @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (selectedAnnotation != null && event?.action == MotionEvent.ACTION_MOVE) {
-            selectedAnnotation?.move(event.x, event.y)
-        } else {
-            when (currentTool) {
-                Tool.PEN -> {
-                    handlePenToolTouchEvent(event)
-                }
-                Tool.TEXT -> {
-                    handleTextToolTouchEvent(event)
-                }
-                Tool.SHAPE -> {
-                    handleShapeToolTouchEvent(event)
-                }
+
+        if (dragging) {
+            selectedAnnotation?.move(event!!.x, event.y)
+        }
+
+        when (currentTool) {
+            Tool.PEN -> {
+                handlePenToolTouchEvent(event)
+            }
+            Tool.TEXT -> {
+                handleTextToolTouchEvent(event)
+            }
+            Tool.SHAPE -> {
+                handleShapeToolTouchEvent(event)
             }
         }
+
         invalidate()
         return true
     }
@@ -106,19 +110,36 @@ class ScreenAnnotator @JvmOverloads constructor(
     private fun handlePenToolTouchEvent(event: MotionEvent?) {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
+                if (attemptToSelectAnnotation) {
+                    selectedAnnotation?.getRect()?.let { boundingBox ->
+                        if (event.x > boundingBox.left &&
+                            event.x < boundingBox.right &&
+                            event.y > boundingBox.top &&
+                            event.y < boundingBox.bottom
+                        ) {
+                            dragging = true
+                        }
+                    }
+                }
                 attemptToSelectAnnotation = true
                 startPenDrawing(event.x, event.y)
             }
             MotionEvent.ACTION_MOVE -> {
-                attemptToSelectAnnotation = false
-                recordPenMovement(event.x, event.y)
+                if (!dragging) {
+                    recordPenMovement(event.x, event.y)
+                    attemptToSelectAnnotation = false
+                }
             }
             MotionEvent.ACTION_UP -> {
-                if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
-                    annotations.removeAt(annotations.size - 1)
-                } else {
-                    stopPenRecording()
+                if (!dragging) {
+                    if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
+                        annotations.removeAt(annotations.size - 1)
+                    } else {
+                        stopPenRecording()
+                    }
                 }
+                dragging = false
+                selectedAnnotation?.resetLastClick()
             }
         }
     }
@@ -129,15 +150,22 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @param event the touch event information to be processed
      */
     private fun handleTextToolTouchEvent(event: MotionEvent?) {
-        if (event?.action == MotionEvent.ACTION_DOWN) {
-            if (textToolState != NONE) resetTextAnnotation()
-            if (!annotationWasSelected(event.x, event.y)) {
-                textToolState = INITIALIZING
-                initializeTextAnnotation(event.x, event.y)
-            } else {
-                attemptToSelectAnnotation = true
+        when {
+            event?.action == MotionEvent.ACTION_DOWN -> {
+                if (textToolState != NONE) resetTextAnnotation()
+                if (!annotationWasSelected(event.x, event.y)) {
+                    textToolState = INITIALIZING
+                    initializeTextAnnotation(event.x, event.y)
+                } else {
+                    attemptToSelectAnnotation = true
+                }
+                invalidate()
             }
-            invalidate()
+            event?.action == MotionEvent.ACTION_MOVE -> dragging = true
+            event?.action == MotionEvent.ACTION_UP -> {
+                dragging = false
+                selectedAnnotation?.resetLastClick()
+            }
         }
     }
 
@@ -149,18 +177,34 @@ class ScreenAnnotator @JvmOverloads constructor(
     private fun handleShapeToolTouchEvent(event: MotionEvent?) {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
+                if (attemptToSelectAnnotation) {
+                    selectedAnnotation?.getRect()?.let { boundingBox ->
+                        if (event.x > boundingBox.left &&
+                            event.x < boundingBox.right &&
+                            event.y > boundingBox.top &&
+                            event.y < boundingBox.bottom
+                        ) {
+                            dragging = true
+                        }
+                    }
+                }
                 attemptToSelectAnnotation = true
                 startShapeDrawing(event.x, event.y)
             }
             MotionEvent.ACTION_MOVE -> {
-                attemptToSelectAnnotation = false
-                recordShapeMovement(event.x, event.y)
+                if (!dragging) {
+                    attemptToSelectAnnotation = false
+                    recordShapeMovement(event.x, event.y)
+                }
             }
             MotionEvent.ACTION_UP -> {
-                if (attemptToSelectAnnotation) {
-                    annotations.removeAt(annotations.size - 1)
-                    annotationWasSelected(event.x, event.y)
+                if (!dragging) {
+                    if (attemptToSelectAnnotation && annotationWasSelected(event.x, event.y)) {
+                        annotations.removeAt(annotations.size - 1)
+                    }
                 }
+                dragging = false
+                selectedAnnotation?.resetLastClick()
             }
         }
     }
@@ -261,14 +305,14 @@ class ScreenAnnotator @JvmOverloads constructor(
      * @return true if annotation was selected, false otherwise
      */
     private fun annotationWasSelected(x: Float, y: Float): Boolean {
-        selectedAnnotation = null
         annotations.forEach { annotation ->
             if (annotation.wasSelected(x, y)) {
                 selectedAnnotation = annotation
                 return true
             }
         }
-        if (selectedAnnotation == null) attemptToSelectAnnotation = false
+        selectedAnnotation = null
+        attemptToSelectAnnotation = false
         invalidate()
         return false
     }

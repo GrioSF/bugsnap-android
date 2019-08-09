@@ -8,6 +8,7 @@ data class PenAnnotation(
     override var color: String,
     override var size: Float,
     override var defaultBrush: Paint,
+    override var lastClick: PointF?,
     var drawnPath: Path,
     var startX: Float,
     var startY: Float,
@@ -16,9 +17,7 @@ data class PenAnnotation(
     var left: Float,
     var top: Float,
     var right: Float,
-    var bottom: Float,
-    var translateX: Float?,
-    var translateY: Float?
+    var bottom: Float
 ) : BaseAnnotation {
 
     init {
@@ -33,7 +32,7 @@ data class PenAnnotation(
     }
 
     constructor(color: String, size: Float, x: Float, y: Float) :
-            this(color, size, Paint(), Path(), x, y, x, y, x, y, x, y, null, null)
+            this(color, size, Paint(), null, Path(), x, y, x, y, x, y, x, y)
 
     override fun drawToCanvas(canvas: Canvas?) {
         canvas?.drawPath(drawnPath, defaultBrush)
@@ -51,21 +50,23 @@ data class PenAnnotation(
     }
 
     override fun move(x: Float, y: Float) {
-        if (translateX == null) translateX = x
-        if (translateY == null) translateY = y
-        val dx = x - translateX!!
-        val dy = y - translateY!!
-        startX += dx
-        endX += dx
-        left += dx
-        right += dx
-        startY += dy
-        endY += dy
-        top += dy
-        bottom += dy
-        drawnPath.offset(dx, dy)
-        translateX = x
-        translateY = y
+        lastClick?.let {
+            val dx = x - it.x
+            val dy = y - it.y
+            startX += dx
+            endX += dx
+            left += dx
+            right += dx
+            startY += dy
+            endY += dy
+            top += dy
+            bottom += dy
+            drawnPath.offset(dx, dy)
+            it.x = x
+            it.y = y
+        } ?: run {
+            lastClick = PointF(x, y)
+        }
     }
 
     override fun getRect(): RectF {

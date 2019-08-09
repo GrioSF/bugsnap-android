@@ -9,6 +9,7 @@ data class RectangleAnnotation(
     override var color: String,
     override var size: Float,
     override var defaultBrush: Paint,
+    override var lastClick: PointF?,
     var start: PointF,
     var end: PointF
 ) : ShapeAnnotation {
@@ -24,7 +25,7 @@ data class RectangleAnnotation(
         }
     }
 
-    constructor(color: String, x: Float, y: Float) : this(color, 15f, Paint(), PointF(x, y), PointF(x, y))
+    constructor(color: String, x: Float, y: Float) : this(color, 15f, Paint(), null, PointF(x, y), PointF(x, y))
 
     override fun drawToCanvas(canvas: Canvas?) {
         canvas?.drawRect(
@@ -41,7 +42,18 @@ data class RectangleAnnotation(
     }
 
     override fun move(x: Float, y: Float) {
-        // do things
+        lastClick?.let {
+            val dx = x - it.x
+            val dy = y - it.y
+            start.x += dx
+            start.y += dy
+            end.x += dx
+            end.y += dy
+            it.x = x
+            it.y = y
+        } ?: run {
+            lastClick = PointF(x, y)
+        }
     }
 
     override fun wasSelected(x: Float, y: Float): Boolean {

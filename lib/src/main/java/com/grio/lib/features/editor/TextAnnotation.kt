@@ -1,14 +1,13 @@
 package com.grio.lib.features.editor
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
+import android.util.Log
 
 data class TextAnnotation(
     override var color: String,
     override var size: Float,
     override var defaultBrush: Paint,
+    override var lastClick: PointF?,
     var text: String,
     var x: Float,
     var y: Float,
@@ -35,7 +34,7 @@ data class TextAnnotation(
     }
 
     constructor(color: String, size: Float, x: Float, y: Float) :
-            this(color, size, Paint(), "", x, y, Paint(), Paint())
+            this(color, size, Paint(), null, "", x, y, Paint(), Paint())
 
     override fun drawToCanvas(canvas: Canvas?) {
         canvas?.drawRect(getRect(), textBackgroundBrush)
@@ -55,16 +54,26 @@ data class TextAnnotation(
         if (x > (this.x - textWidth / 2 - (size / 2)) &&
             x < (this.x + textWidth / 2 + (size / 2)) &&
             y > (this.y - (size / 2) - size) &&
-            y < this.y
+            y < this.y + size / 2
         ) {
+            Log.wtf("WAS_SELECTED", "True")
             return true
         }
+        Log.wtf("WAS_SELECTED", "False")
         return false
     }
 
     override fun move(x: Float, y: Float) {
-        this.x = x
-        this.y = y
+        lastClick?.let {
+            val dx = x - it.x
+            val dy = y - it.y
+            this.x += dx
+            this.y += dy
+            it.x = x
+            it.y = y
+        } ?: run {
+            lastClick = PointF(x, y)
+        }
     }
 
     override fun getRect(): RectF {
