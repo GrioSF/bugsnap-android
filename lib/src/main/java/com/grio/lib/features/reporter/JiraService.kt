@@ -1,6 +1,6 @@
-package com.grio.lib.features.editor
+package com.grio.lib.features.reporter
 
-import com.grio.lib.features.editor.models.CreateIssueRequest
+import com.grio.lib.features.reporter.models.CreateIssueRequest
 
 import okhttp3.MultipartBody
 import retrofit2.Retrofit

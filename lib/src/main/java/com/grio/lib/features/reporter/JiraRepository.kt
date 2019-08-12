@@ -1,12 +1,12 @@
-package com.grio.lib.features.editor
+package com.grio.lib.features.reporter
 
 import com.grio.lib.core.exception.Failure
 import com.grio.lib.core.functional.Either
 import com.grio.lib.core.platform.NetworkHandler
 import com.grio.lib.features.BugSnap
-import com.grio.lib.features.editor.models.CreateIssueRequest
-import com.grio.lib.features.editor.models.CreateIssueResponse
-import com.grio.lib.features.editor.models.CreationMeta
+import com.grio.lib.features.reporter.models.CreateIssueRequest
+import com.grio.lib.features.reporter.models.CreateIssueResponse
+import com.grio.lib.features.reporter.models.CreationMeta
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody

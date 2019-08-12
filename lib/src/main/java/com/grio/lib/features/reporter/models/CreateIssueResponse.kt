@@ -1,4 +1,4 @@
-package com.grio.lib.features.editor.models
+package com.grio.lib.features.reporter.models
 
 import com.google.gson.annotations.SerializedName
 

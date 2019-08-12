@@ -1,8 +1,8 @@
-package com.grio.lib.features.editor
+package com.grio.lib.features.reporter
 
-import com.grio.lib.features.editor.models.CreateIssueRequest
-import com.grio.lib.features.editor.models.CreateIssueResponse
-import com.grio.lib.features.editor.models.CreationMeta
+import com.grio.lib.features.reporter.models.CreateIssueRequest
+import com.grio.lib.features.reporter.models.CreateIssueResponse
+import com.grio.lib.features.reporter.models.CreationMeta
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call

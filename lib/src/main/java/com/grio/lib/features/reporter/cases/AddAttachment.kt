@@ -1,7 +1,7 @@
-package com.grio.lib.features.editor.cases
+package com.grio.lib.features.reporter.cases
 
 import com.grio.lib.core.interactor.UseCase
-import com.grio.lib.features.editor.JiraRepository
+import com.grio.lib.features.reporter.JiraRepository
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
