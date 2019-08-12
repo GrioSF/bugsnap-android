@@ -75,7 +75,6 @@ dependencies {
 
     // Local BugSnap library.
     implementation project(":lib")
-    //implementation 'com.github.GrioSF:bugsnap-android:v0.2.3'
 }
 
 def readVersion() {
