@@ -1,8 +1,8 @@
-package com.grio.lib.features.editor.cases
+package com.grio.lib.features.reporter.cases
 
 import com.grio.lib.core.interactor.UseCase
-import com.grio.lib.features.editor.models.CreateIssueResponse
-import com.grio.lib.features.editor.JiraRepository
+import com.grio.lib.features.reporter.models.CreateIssueResponse
+import com.grio.lib.features.reporter.JiraRepository
 import javax.inject.Inject
 
 class CreateIssue

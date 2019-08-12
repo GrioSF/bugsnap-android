@@ -5,8 +5,10 @@ import com.grio.lib.core.exception.Failure
 import com.grio.lib.core.functional.Either
 import com.grio.lib.core.platform.NetworkHandler
 import com.grio.lib.features.BugSnap
-import com.grio.lib.features.editor.models.CreateIssueRequest
-import com.grio.lib.features.editor.models.CreateIssueResponse
+import com.grio.lib.features.reporter.models.CreateIssueRequest
+import com.grio.lib.features.reporter.models.CreateIssueResponse
+import com.grio.lib.features.reporter.JiraRepository
+import com.grio.lib.features.reporter.JiraService
 import com.nhaarman.mockitokotlin2.given
 import com.nhaarman.mockitokotlin2.verify
 import okhttp3.MultipartBody

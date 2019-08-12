@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.grio.lib.features.BugSnap
 import com.grio.lib.BuildConfig
-import com.grio.lib.features.editor.JiraRepository
+import com.grio.lib.features.reporter.JiraRepository
 import dagger.Module
 import dagger.Provides
 import okhttp3.Credentials
