@@ -13,7 +13,7 @@ An Android Library enabling users to report bugs directly from their mobile devi
         repositories {
             maven { url 'https://jitpack.io' }
         }
-	}
+    }
     ```
 2. Add `com.github.GrioSF:bugsnap-android:v0.2.4` as a dependency in your application's `build.gradle` file.
 3. Locate (or create if needed) your `local.properties` file and add the following:
