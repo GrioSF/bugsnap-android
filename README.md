@@ -6,29 +6,39 @@
 An Android Library enabling users to report bugs directly from their mobile device.
 
 ### Get Started
-1. Add `com.replace.me:bugsnap:x.x.x` as a dependency in your application's `build.gradle` file.
-2. Locate (or create if needed) your `local.properties` file and add the following:
-```properties
-bugsnap.url="[Your JIRA URL]"
-bugsnap.projectName="[Your JIRA project name]"
-bugsnap.projectKey="[Your JIRA project key]"
-bugsnap.jiraUsername="[Your JIRA username]"
-bugsnap.jiraApiKey="[Your JIRA API key]"
-```
-3. Ensure your project is synced. Finally, in your `Application` subclass, add the following in the `onCreate()` method:
-```kotlin
-override fun onCreate() {                     
-    super.onCreate()
-    if (BuildConfig.DEBUG) {                  
-        BugSnap.init(this,                    
-            BuildConfig.BUGSNAP_URL,          
-            BuildConfig.BUGSNAP_PROJECT_NAME, 
-            BuildConfig.BUGSNAP_PROJECT_KEY,  
-            BuildConfig.BUGSNAP_JIRA_USERNAME,
-            BuildConfig.BUGSNAP_JIRA_API_KEY) 
-    }                                         
-}                                             
-```
+
+1. Add the Jitpack repository.
+    ```gradle
+    allprojects {
+        repositories {
+            maven { url 'https://jitpack.io' }
+        }
+    }
+    ```
+2. Add `com.github.GrioSF:bugsnap-android:v0.2.4` as a dependency in your application's `build.gradle` file.
+3. Locate (or create if needed) your `local.properties` file and add the following:
+
+    ```properties
+    bugsnap.url="[Your JIRA URL]"
+    bugsnap.projectName="[Your JIRA project name]"
+    bugsnap.projectKey="[Your JIRA project key]"
+    bugsnap.jiraUsername="[Your JIRA username]"
+    bugsnap.jiraApiKey="[Your JIRA API key]"
+    ```
+4. Ensure your project is synced. Finally, in your `Application` subclass, add the following in the `onCreate()` method:
+    ```kotlin
+    override fun onCreate() {                     
+        super.onCreate()
+        if (BuildConfig.DEBUG) {                  
+            BugSnap.init(this,                    
+                BuildConfig.BUGSNAP_URL,          
+                BuildConfig.BUGSNAP_PROJECT_NAME, 
+                BuildConfig.BUGSNAP_PROJECT_KEY,  
+                BuildConfig.BUGSNAP_JIRA_USERNAME,
+                BuildConfig.BUGSNAP_JIRA_API_KEY) 
+        }                                         
+    }                                             
+    ```
 
 To begin the reporting flow, simply shake the device.
 
