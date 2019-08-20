@@ -42,6 +42,12 @@ An Android Library enabling users to report bugs directly from their mobile devi
 
 To begin the reporting flow, simply shake the device.
 
+Note that when first utilizing the screen recording flow, a user will be taken to the Settings app. The toggle must be manually enabled to allow recording:
+
+<img src="https://github.com/GrioSF/bugsnap-android/blob/dev/settings.png?raw=true" height="300">
+
+After enabling, please relaunch your app.
+
 ### Development
 #### Distribution
   * Install fastlane by follow the [fastlane installation instructions](fastlane/README.md)
