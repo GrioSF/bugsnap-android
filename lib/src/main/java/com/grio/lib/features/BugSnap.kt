@@ -34,6 +34,7 @@ class BugSnap {
         lateinit var jiraProjectKey: String
         lateinit var jiraUsername: String
         lateinit var jiraApiKey: String
+        var dialog: ReportTypeDialog? = null
 
         /**
          * Initializes the library.
@@ -68,9 +69,12 @@ class BugSnap {
                          ShakeDetector.Listener {
                          override fun hearShake() {
 
+                             if (dialog != null && dialog!!.isVisible) {
+                                 dialog!!.dismissAllowingStateLoss()
+                             }
                              // Start dialog for choosing
                              // reporting flow.
-                             val dialog = ReportTypeDialog(object : ReportTypeDialog.SelectionCallback {
+                             dialog = ReportTypeDialog(object : ReportTypeDialog.SelectionCallback {
                                  override fun onSelection(type: ReportTypeDialog.ReportType) {
                                     when (type) {
                                         ReportTypeDialog.ReportType.SCREENSHOT -> {
@@ -89,9 +93,12 @@ class BugSnap {
                                             initiateScreenRecording(activity!!, activity)
                                         }
                                     }
+                                     if (dialog != null) {
+                                         dialog!!.dismissAllowingStateLoss()
+                                     }
                                  }
                              })
-                             dialog.show(activity!!.fragmentManager, "dialog")
+                             dialog!!.show(activity!!.fragmentManager, "reporttypedialog")
                          }
                      })
 
@@ -99,7 +106,12 @@ class BugSnap {
                     sd?.start(sensorManager!!)
                 }
 
-                override fun onActivityPaused(activity: Activity?) {}
+                override fun onActivityPaused(activity: Activity?) {
+                    sd?.clearForPause()
+                    if (dialog != null) {
+                        dialog!!.dismissAllowingStateLoss()
+                    }
+                }
                 override fun onActivityStopped(activity: Activity?) {}
                 override fun onActivityResumed(activity: Activity?) {}
                 override fun onActivityDestroyed(activity: Activity?) {

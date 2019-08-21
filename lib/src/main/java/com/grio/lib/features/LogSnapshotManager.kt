@@ -4,7 +4,7 @@ class LogSnapshotManager {
 
     companion object {
 
-        fun getLogTail(limit: Int = 200): String {
+        fun getLogTail(limit: Int = 120): String {
             val logcat: Process
             var logList = listOf<String>()
 
