@@ -77,7 +77,8 @@ class ReporterActivity :  BaseActivity() {
             if (loadingDialog != null) {
                 loadingDialog.dismiss()
             }
-            Toast.makeText(this, "Ticket created.", Toast.LENGTH_SHORT).show()
+            val success = viewModel.successResponse.value?.newIssueKey
+            Toast.makeText(this, "Ticket $success created.", Toast.LENGTH_SHORT).show()
             finish()
         }
     }

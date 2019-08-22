@@ -14,6 +14,8 @@ class ReporterViewModel
 @Inject constructor(private val createIssue: CreateIssue, private val addAttachment: AddAttachment) : BaseViewModel() {
 
     var isLoading: MutableLiveData<Boolean> = MutableLiveData()
+    var isSuccess: MutableLiveData<Boolean> = MutableLiveData()
+    var successResponse: MutableLiveData<ReporterResponse> = MutableLiveData()
     var log: String = ""
 
     private val files = ArrayList<MultipartBody.Part>()
@@ -41,6 +43,7 @@ class ReporterViewModel
 
         }, {
 
+            val createIssueResponse = it
             Log.i("BugSnap", "Successfully create issue.")
 
             // If successful, add attachment.
@@ -57,9 +60,14 @@ class ReporterViewModel
                 isLoading.value = false
                 Log.e("BugSnap", "Failed to upload attachment: $it")
             }, {
+
+                isSuccess.value = true
+                successResponse.value = ReporterResponse(createIssueResponse.key)
                 isLoading.value = false
                 Log.i("BugSnap", "Attachment uploaded successfully! $it")
             })}
         }) }
     }
 }
+
+data class ReporterResponse(val newIssueKey: String)

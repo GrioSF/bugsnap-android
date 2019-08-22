@@ -88,12 +88,19 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
                 listener.hearShake()
                 debounceMillis = System.currentTimeMillis()
             } else {
-                if (System.currentTimeMillis() - (debounceMillis as Long) >= 1000) {
+
+                val diff = System.currentTimeMillis() - (debounceMillis as Long)
+                if (diff >= 1200) {
                     queue.clear()
                     listener.hearShake()
                 }
             }
         }
+    }
+
+    fun clearForPause() {
+        queue.clear()
+        debounceMillis = null
     }
 
 
@@ -267,6 +274,6 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
         val SENSITIVITY_HARD = 15
 
         private val DEFAULT_ACCELERATION_THRESHOLD =
-            SENSITIVITY_MEDIUM
+            SENSITIVITY_LIGHT
     }
 }
