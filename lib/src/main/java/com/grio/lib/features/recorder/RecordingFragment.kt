@@ -50,15 +50,16 @@ class RecordingFragment : Fragment() {
         startActivityForResult(intent, SCREEN_RECORD_REQUEST_CODE)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == SCREEN_OVERLAY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+            var bool = Settings.canDrawOverlays(context)
+            if (resultCode == Activity.RESULT_OK || bool) {
                 onOverlayPermissionsGranted()
             } else {
                 permissionCallback!!.onPermissionDenied(PermissionType.OVERLAY)
             }
         } else if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
                 permissionCallback!!.onPermissionGranted(resultCode, data)
             } else {
                 permissionCallback!!.onPermissionDenied(PermissionType.RECORDING)
@@ -79,7 +80,7 @@ class RecordingFragment : Fragment() {
 
     companion object {
         const val TAG = "com.grio.lib.features.recorder.RecordingFragment"
-        private const val SCREEN_OVERLAY_REQUEST_CODE = 1234
+        private const val SCREEN_OVERLAY_REQUEST_CODE = 12347
         private const val SCREEN_RECORD_REQUEST_CODE = 12345
     }
 }
